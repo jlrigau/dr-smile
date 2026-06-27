@@ -31,18 +31,14 @@ def draw_face(skin, hair, style, eye):
         d.ellipse((ex - 60, 520, ex + 60, 700), fill=skin, outline=skinD, width=2)
         d.ellipse((ex - 28, 566, ex + 28, 654), fill=skinD)
 
-    # hair: band along the top + soft fringe, with a hint of the style
+    # hair: just a clean band along the top + a soft fringe (no top-of-head bumps —
+    # the actual hairstyle is shown on the board sprite, not in this extreme close-up).
     d.rectangle((0, 0, W, 150), fill=hair)
     for fx in range(-20, W + 40, 70):
         d.ellipse((fx - 48, 120, fx + 48, 236), fill=hair)
     if style == "curly":
         for fx in range(-10, W + 20, 64):
             d.ellipse((fx - 50, 60, fx + 50, 196), fill=hair)
-    if style == "bun":
-        d.ellipse((CX - 80, -78, CX + 80, 96), fill=hair, outline=hairD, width=3)
-    if style in ("pigtails", "ponytail"):
-        d.ellipse((-50, 150, 150, 430), fill=hair, outline=hairD, width=3)
-        d.ellipse((W - 150, 150, W + 50, 430), fill=hair, outline=hairD, width=3)
 
     # eyebrows + eyes (big, looking down)
     for sx in (-1, 1):

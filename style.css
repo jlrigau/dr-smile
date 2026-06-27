@@ -226,7 +226,8 @@ input[type="text"]::placeholder { color: #a9bcc2; }
   transition: transform .09s ease, opacity .09s ease; will-change: transform, opacity;
   filter: drop-shadow(0 2px 1px rgba(120, 90, 40, 0.25));
 }
-.closeup-brush { position: absolute; width: 92px; height: 92px; transform: translate(-38%, -64%); pointer-events: none; image-rendering: pixelated; z-index: 6; -webkit-user-drag: none; }
+/* starts visible at the bottom-centre; follows the finger once you touch */
+.closeup-brush { position: absolute; left: 50%; top: 82%; width: 104px; height: 104px; transform: translate(-38%, -64%); pointer-events: none; image-rendering: pixelated; z-index: 6; -webkit-user-drag: none; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3)); }
 .cu-emoji { position: absolute; transform: translate(-50%, -50%); font-size: 1.8rem; pointer-events: none; z-index: 7; animation: cuPop .9s ease-out forwards; }
 .cu-emoji.cu-burst { font-size: 2.4rem; animation: cuRise 1.2s ease-out forwards; }
 @keyframes cuPop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.3); } 30% { opacity: 1; transform: translate(-50%,-50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%,-90%) scale(1); } }

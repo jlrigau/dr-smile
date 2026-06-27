@@ -1460,8 +1460,10 @@ function openCloseup(c, a) {
     stage.appendChild(s);
   }
   if (brush) {
-    if (cfg.brush) { brush.src = imgPath(cfg.brush, "brush"); brush.classList.remove("hidden"); }
-    else brush.classList.add("hidden");
+    if (cfg.brush) {
+      brush.src = imgPath(cfg.brush, "brush"); brush.classList.remove("hidden");
+      brush.style.left = ""; brush.style.top = "";   // reset to the visible CSS start position
+    } else brush.classList.add("hidden");
   }
   cuState = { c, a, remaining: count, pressed: false };
   closeupOpen = true;
