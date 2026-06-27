@@ -437,10 +437,17 @@ function buildAnims() {
   });
   if (CREATURE) {
     const w = CREATURE.walk || { start: 0, end: 3, frameRate: 6 };
-    const key = "creature-walk";
-    if (!sc.anims.exists(key)) sc.anims.create({
-      key, frames: sc.anims.generateFrameNumbers(CREATURE.sheet, { start: w.start, end: w.end }),
-      frameRate: w.frameRate || 6, repeat: -1,
+    // One walk anim per distinct sheet (base + any variant with its own sheet), so
+    // variants that ship a dedicated spritesheet animate instead of snapping back
+    // to the base sheet's frames.
+    const sheets = new Set([CREATURE.sheet]);
+    VARIANTS.forEach((v) => { if (v.sheet) sheets.add(v.sheet); });
+    sheets.forEach((sheet) => {
+      const key = "creature-walk-" + sheet;
+      if (!sc.anims.exists(key)) sc.anims.create({
+        key, frames: sc.anims.generateFrameNumbers(sheet, { start: w.start, end: w.end }),
+        frameRate: w.frameRate || 6, repeat: -1,
+      });
     });
   }
 }
@@ -709,13 +716,14 @@ function creatureTexture(c) {
   const v = variantDef(variantId(c));
   return (v && v.sheet) ? v.sheet : CREATURE.sheet;
 }
+function creatureWalkKey(c) { return "creature-walk-" + creatureTexture(c); }
 
 function buildCreatureObj(c) {
   const scale = creatureScale(c);
   const orig = CREATURE.origin || { x: 0.5, y: 0.85 };
   const shadow = sc.add.ellipse(0, 0, 58, 16, 0x000000, 0.25).setScale(scale);
   const body = sc.add.sprite(0, 0, creatureTexture(c)).setOrigin(orig.x, orig.y).setScale(scale);
-  body.play("creature-walk");
+  body.play(creatureWalkKey(c));
   applyVariantTint(body, c);
   const heart = sc.add.image(0, heartY(c), ensureShape(MOOD_SHAPE)).setOrigin(0.5).setScale(0.95).setTint(0x6fcf5f);
   const nameT = sc.add.text(0, 22, c.name, { fontSize: "16px", fontFamily: "sans-serif", color: "#fff8ec", fontStyle: "bold", stroke: "#3a2716", strokeThickness: 4 }).setOrigin(0.5);
@@ -727,7 +735,7 @@ function refreshCreatureVisual(c) {
   if (!c.obj) return;
   const scale = creatureScale(c);
   c.bodyT.setTexture(creatureTexture(c));
-  c.bodyT.play("creature-walk");
+  c.bodyT.play(creatureWalkKey(c));
   applyVariantTint(c.bodyT, c);
   c.bodyT.setScale(scale);
   if (c.shadowT) c.shadowT.setScale(scale);

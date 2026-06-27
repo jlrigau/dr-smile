@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate Dr Smile character sprites: player walkcycle + patient creature sheet.
+"""Generate Dr Smile character sprites: player walkcycle (the patients live in gen_kids.py).
 Pixel-art, drawn at native resolution (engine scales with nearest-neighbour)."""
 import math, os
 from PIL import Image, ImageDraw
@@ -128,49 +128,4 @@ def make_thumb(sheetpath, outpath):
 make_thumb(OUT + "/sheet/drsmile.png", OUT + "/ui/drsmile_thumb.png")
 make_thumb(OUT + "/sheet/drsmile_pink.png", OUT + "/ui/drsmile_pink_thumb.png")
 
-# ---------------- Patient creature sheet (256x64, 4-frame bob, front-facing) ----
-# Drawn mostly light so the engine tint recolours the body per variant.
-def draw_patient(frame):
-    im = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    cx = 32
-    bob = [0, -2, -3, -2][frame]
-    base_y = 58 + bob
-    body = (250, 250, 250, 255)      # near-white → tints cleanly
-    outline = (70, 60, 75, 255)
-    # feet
-    for side in (-1, 1):
-        fx = cx + side*6
-        d.ellipse((fx-5, base_y-5, fx+5, base_y+1), fill=(225, 225, 230, 255), outline=outline)
-    # round body
-    d.ellipse((cx-15, base_y-34, cx+15, base_y-2), fill=body, outline=outline)
-    # little arms
-    sway = [(-1,1),(0,0),(1,-1),(0,0)][frame]
-    for i, side in enumerate((-1, 1)):
-        ax = cx + side*15
-        ay = base_y - 20 + sway[i]*2
-        d.ellipse((ax-4, ay-4, ax+4, ay+4), fill=body, outline=outline)
-    # head (big, cute)
-    hy = base_y - 38
-    d.ellipse((cx-14, hy-16, cx+14, hy+8), fill=body, outline=outline)
-    # tuft of hair
-    d.ellipse((cx-4, hy-19, cx+4, hy-12), fill=(120, 100, 90, 255))
-    # eyes (pure dark so they survive tint)
-    eye = (35, 30, 40, 255)
-    d.ellipse((cx-8, hy-6, cx-3, hy+0), fill=eye)
-    d.ellipse((cx+3, hy-6, cx+8, hy+0), fill=eye)
-    d.ellipse((cx-7, hy-5, cx-5, hy-3), fill=(255,255,255,255))
-    d.ellipse((cx+4, hy-5, cx+6, hy-3), fill=(255,255,255,255))
-    # cheeks
-    d.ellipse((cx-12, hy+0, cx-8, hy+4), fill=(255, 160, 170, 220))
-    d.ellipse((cx+8, hy+0, cx+12, hy+4), fill=(255, 160, 170, 220))
-    # small neutral smile
-    d.arc((cx-5, hy+1, cx+5, hy+8), 10, 170, fill=eye, width=2)
-    return im
-
-psheet = Image.new("RGBA", (256, 64), (0, 0, 0, 0))
-for i in range(4):
-    fr = draw_patient(i)
-    psheet.paste(fr, (i*64, 0), fr)
-
-print("Dr Smile character sprites generated.")
+print("Dr Smile player sprites generated.")

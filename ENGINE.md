@@ -85,7 +85,7 @@ moodFrom: ["food","energy","clean","joy"],   // needs averaged into the mood hea
 showBars: true,                        // false → hide the per-need bars in the panel (kid-friendly)
 moodDay: { base, lowPenalty, lowAt, highBonus, highAt },   // overnight mood rule
 needs: [ { id, icon, start, perDay } ],      // perDay = overnight delta (0..100 bars)
-variants: [ { id, name, color, tint? , sheet? } ],
+variants: [ { id, name, color, tint? , sheet? } ],   // sheet = a dedicated, animated spritesheet for this variant (else base sheet + optional tint)
 actions: [ {
   id, label, icon,
   cost:{resource,amount}?, require:{need:min}?, effects:{need:+/-}?, reward?,

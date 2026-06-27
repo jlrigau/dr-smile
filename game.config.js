@@ -26,7 +26,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v4",
+    assetVersion: "v5",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
@@ -75,7 +75,13 @@ window.GAME = {
     sheets: {
       drsmile: { path: "assets/sheet/drsmile.png", frameWidth: 64, frameHeight: 64 },
       drsmile_pink: { path: "assets/sheet/drsmile_pink.png", frameWidth: 64, frameHeight: 64 },
-      patient: { path: "assets/sheet/patient.png", frameWidth: 64, frameHeight: 64 },
+      // the child patients — each its own 4-frame sheet (boys & girls)
+      kid_leo: { path: "assets/sheet/kid_leo.png", frameWidth: 64, frameHeight: 64 },
+      kid_mila: { path: "assets/sheet/kid_mila.png", frameWidth: 64, frameHeight: 64 },
+      kid_sacha: { path: "assets/sheet/kid_sacha.png", frameWidth: 64, frameHeight: 64 },
+      kid_lou: { path: "assets/sheet/kid_lou.png", frameWidth: 64, frameHeight: 64 },
+      kid_tom: { path: "assets/sheet/kid_tom.png", frameWidth: 64, frameHeight: 64 },
+      kid_zoe: { path: "assets/sheet/kid_zoe.png", frameWidth: 64, frameHeight: 64 },
     },
   },
 
@@ -95,7 +101,7 @@ window.GAME = {
      are filled to 100 when the mouth is fully cleaned. No bars, no reading. */
   creature: {
     label: "patients", icon: "🦷",
-    sheet: "patient",
+    sheet: "kid_leo",                 // base/fallback sheet (every patient has a variant)
     scale: 1.0,
     origin: { x: 0.5, y: 0.9 },
     walk: { start: 0, end: 3, frameRate: 5 },
@@ -123,22 +129,25 @@ window.GAME = {
     ],
     celebrate: { mode: "hop", particle: "heart", colors: ["#ff9ec4", "#ffd24a", "#a8e6ff", "#7fd06f"], count: 10 },
 
-    // Different-coloured patients (tints of the one patient sheet) for variety.
+    // The child patients: boys & girls, each its own sprite (animated per-variant).
     variants: [
-      { id: "sun", name: "Soleil", color: "#ffd86b", tint: "#ffe39a" },
-      { id: "sky", name: "Ciel", color: "#86c8ff", tint: "#a7d8ff" },
-      { id: "leaf", name: "Pomme", color: "#9fe08f", tint: "#b6e8b0" },
-      { id: "rose", name: "Bonbon", color: "#ff9fc0", tint: "#ffc4d6" },
-      { id: "lilac", name: "Myrtille", color: "#c0a8ff", tint: "#d3c1ff" },
+      { id: "leo", name: "Léo", sheet: "kid_leo", color: "#5aa9e6" },     // boy
+      { id: "mila", name: "Mila", sheet: "kid_mila", color: "#ff8fb3" },  // girl
+      { id: "sacha", name: "Sacha", sheet: "kid_sacha", color: "#6cc47a" }, // boy
+      { id: "lou", name: "Lou", sheet: "kid_lou", color: "#ffd24a" },     // girl
+      { id: "tom", name: "Tom", sheet: "kid_tom", color: "#ef6a6a" },     // boy
+      { id: "zoe", name: "Zoé", sheet: "kid_zoe", color: "#b48ae6" },     // girl
     ],
 
-    names: ["Léo", "Mila", "Pilou", "Lou", "Nino", "Doudou", "Bibou", "Gribouille", "Câlin", "Zoé", "Tom", "Lila"],
-    startCount: 4,
+    names: ["Léo", "Mila", "Sacha", "Lou", "Tom", "Zoé", "Nina", "Hugo", "Jade", "Sami", "Lina", "Noé"],
+    startCount: 6,
     startCreatures: [
-      { name: "Léo", variant: "sky" },
-      { name: "Mila", variant: "rose" },
-      { name: "Pilou", variant: "sun" },
-      { name: "Lou", variant: "leaf" },
+      { name: "Léo", variant: "leo" },
+      { name: "Mila", variant: "mila" },
+      { name: "Sacha", variant: "sacha" },
+      { name: "Lou", variant: "lou" },
+      { name: "Tom", variant: "tom" },
+      { name: "Zoé", variant: "zoe" },
     ],
   },
 
