@@ -138,7 +138,9 @@ action = {
       growEvery: 2, max: 12,      // +1 spot every N completions of this action (ramps up), capped
       rubs: 3,                    // scrubs needed to remove one spot
       size: 74,                   // spot size in px
-      area: { x, y, w, h },       // spawn region as 0..1 fractions of the stage (target the teeth)
+      area: { x, y, w, h },       // spawn region as 0..1 fractions of the BACKDROP IMAGE
+                                  //   (the backdrop fills the screen via object-fit:cover;
+                                  //    spots are placed cover-aware so they stay on the teeth)
     },
     finishParticles: ["⭐","💖"], // emojis bursting when the scene is cleared
   },

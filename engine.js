@@ -188,6 +188,7 @@ function init() {
   }
   const cuClose = $("closeup-close");
   if (cuClose) cuClose.addEventListener("click", () => closeCloseup());
+  window.addEventListener("resize", () => { if (closeupOpen) cuPlaceSpots(); });
 }
 
 // Inject configured labels/titles into the static HTML shell.
@@ -1437,7 +1438,6 @@ function openCloseup(c, a) {
   const cv = variantDef(variantId(c));
   const src = imgPath((cv && cv.closeupBg) || cfg.bg, "closeup");
   if (bg) bg.src = src;
-  root.style.backgroundImage = "url('" + src + "')";   // fills the margins (blurred via CSS)
   stage.querySelectorAll(".cu-spot, .cu-emoji").forEach((n) => n.remove());
 
   const sp = cfg.spots || {};
@@ -1450,9 +1450,11 @@ function openCloseup(c, a) {
     const s = document.createElement(cfg.spotSprite ? "img" : "div");
     s.className = "cu-spot";
     if (cfg.spotSprite) s.src = imgPath(cfg.spotSprite, "spot");
-    s.style.left = ((area.x + Math.random() * area.w) * 100).toFixed(2) + "%";
-    s.style.top = ((area.y + Math.random() * area.h) * 100).toFixed(2) + "%";
-    s.style.width = size + "px"; s.style.height = size + "px";
+    // store the spot's position/size as fractions of the BACKDROP IMAGE; it's mapped
+    // to screen pixels in cuPlaceSpots() so it stays on the teeth under object-fit:cover.
+    s.dataset.fx = (area.x + Math.random() * area.w).toFixed(4);
+    s.dataset.fy = (area.y + Math.random() * area.h).toFixed(4);
+    s.dataset.sz = String(size);
     s.style.setProperty("--rot", Math.floor(Math.random() * 360) + "deg");
     s.dataset.rubs0 = String(rubs); s.dataset.rubs = String(rubs); s.dataset.t = "0";
     stage.appendChild(s);
@@ -1465,6 +1467,28 @@ function openCloseup(c, a) {
   closeupOpen = true;
   root.classList.remove("hidden");
   themeColor((META.theme && META.theme.play) || TINT_PLAY);
+  cuPlaceSpots();
+  if (bg) bg.onload = cuPlaceSpots;        // re-place once natural size is known
+}
+
+// Map each spot's image-fraction (fx,fy) to screen px under object-fit:cover, so the
+// backdrop can fill the whole screen (cropped) while spots stay glued to the teeth.
+function cuCover() {
+  const stage = $("closeup-stage"), bg = $("closeup-bg");
+  const Wc = stage.clientWidth, Hc = stage.clientHeight;
+  const iw = (bg && bg.naturalWidth) || 900, ih = (bg && bg.naturalHeight) || 1160;
+  const s = Math.max(Wc / iw, Hc / ih);
+  return { s, dw: iw * s, dh: ih * s, ox: (Wc - iw * s) / 2, oy: (Hc - ih * s) / 2 };
+}
+function cuPlaceSpots() {
+  const stage = $("closeup-stage"); if (!stage) return;
+  const c = cuCover();
+  stage.querySelectorAll(".cu-spot").forEach((s) => {
+    const px = (parseFloat(s.dataset.sz) || 64) * c.s;
+    s.style.left = (c.ox + parseFloat(s.dataset.fx) * c.dw) + "px";
+    s.style.top = (c.oy + parseFloat(s.dataset.fy) * c.dh) + "px";
+    s.style.width = px + "px"; s.style.height = px + "px";
+  });
 }
 
 function cuMoveBrush(e) {

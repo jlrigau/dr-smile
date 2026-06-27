@@ -205,17 +205,9 @@ input[type="text"]::placeholder { color: #a9bcc2; }
 
 /* ===== Close-up mini-scene (zoom on the mouth, scrub the spots) ===== */
 .closeup {
-  position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center;
-  padding: calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));
-  /* the child's face (set inline by the engine) fills the screen; the margins are a
-     blurred continuation of it via ::before, so there is no flat coloured box. */
-  background-color: #e9c9b0; background-size: cover; background-position: center top;
+  position: fixed; inset: 0; z-index: 120;
+  background: #d8b79c;          /* only seen for a frame before the face loads */
   touch-action: none; -webkit-user-select: none; user-select: none; overflow: hidden;
-}
-.closeup::before {
-  content: ""; position: absolute; inset: -40px; z-index: 0;
-  background: inherit; background-size: cover; background-position: center top;
-  filter: blur(26px) brightness(0.94); transform: scale(1.08);
 }
 .closeup-close {
   position: absolute; top: calc(10px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right));
@@ -224,13 +216,10 @@ input[type="text"]::placeholder { color: #a9bcc2; }
   box-shadow: 0 4px 0 #ef7ba0; line-height: 1;
 }
 .closeup-close:active { transform: translateY(3px); box-shadow: 0 0 0 #ef7ba0; }
-.closeup-stage {
-  position: relative; z-index: 1;
-  width: min(94vw, calc(90vh * 0.776)); aspect-ratio: 900 / 1160;
-  border-radius: 28px; overflow: hidden; touch-action: none;
-  box-shadow: 0 18px 50px rgba(60, 40, 40, 0.4);
-}
-.closeup-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; image-rendering: pixelated; pointer-events: none; -webkit-user-drag: none; }
+/* The stage fills the WHOLE screen (no card / no rounded frame); the face is shown
+   with object-fit:cover so it covers the screen, and spots are placed cover-aware. */
+.closeup-stage { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; touch-action: none; }
+.closeup-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center center; pointer-events: none; -webkit-user-drag: none; }
 .cu-spot {
   position: absolute; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)); cursor: pointer;
   image-rendering: pixelated; -webkit-user-drag: none; touch-action: none;
