@@ -47,6 +47,7 @@ title, titleIcon, shortName, tagline, saveKey, assetVersion: "vN",
 audience: { minAge, notes },          // used by the asset skills' content policy
 theme: { home, play },                 // iOS theme-color per screen
 showCoins,                             // false → hide the coins HUD (no economy)
+showDay, showCreatureCount,            // false → hide the 📅 day / creature-count HUD chips (minimal HUD)
 coinIcon, namePrompt:{label,placeholder}, startName, namePromptYou, avatarPrompt,
 createTitle, createOkLabel, startLabel, continueLabel, continueHint, helpTitle,
 ageUnit, and, nightMessage, restBlockedHint, neglectMessage, morningMessage,
@@ -81,6 +82,7 @@ label, icon, sheet, origin:{x,y}, walk:{start,end,frameRate}, moodIcon,  // mood
 youngLabel, adultLabel, variantLabel, customizeTitle, customizedMessage,
 moodNeed: "joy",                       // the need that drives celebration & day-mood
 moodFrom: ["food","energy","clean","joy"],   // needs averaged into the mood heart
+showBars: true,                        // false → hide the per-need bars in the panel (kid-friendly)
 moodDay: { base, lowPenalty, lowAt, highBonus, highAt },   // overnight mood rule
 needs: [ { id, icon, start, perDay } ],      // perDay = overnight delta (0..100 bars)
 variants: [ { id, name, color, tint? , sheet? } ],
@@ -88,7 +90,7 @@ actions: [ {
   id, label, icon,
   cost:{resource,amount}?, require:{need:min}?, effects:{need:+/-}?, reward?,
   anim?, stat?, message?, celebrateMessage?,
-  type: "ride"|"jump"|"customize"?,   // special actions (omit for a normal care action)
+  type: "ride"|"jump"|"customize"|"closeup"?,   // special actions (omit for a normal care action)
 } ],
 customize: { rename, variant },
 ride: { adultsOnly, minEnergy, fatigueNeed, sitY, nameY, onMount:{...}, *Message,
@@ -116,6 +118,36 @@ breeding: { enabled, minMood, cooldown, message },
 names: [...], startCount, startCreatures:[{name,variant}],
 ```
 Omit `ride`/`breeding`/`aging`/`celebrate`/`customize` to disable those systems.
+
+### Close-up mini-scene (`action.type:"closeup"`)
+A creature action of `type:"closeup"` opens a **full-screen scene** zoomed onto a
+backdrop image; the player **scrubs/taps "spots" off it** (works with mouse *and*
+touch) until it's clean, then the action's `effects` / `reward` / `stat` / `celebrate`
+are applied exactly as if a normal action had completed. Generic — use it to clean a
+mouth, wash a pet, polish a gem, wipe a window, etc.
+```
+action = {
+  id, type:"closeup", label, icon,
+  closeup: {
+    bg: "<image key>",            // full-screen backdrop (e.g. an open mouth)
+    spotSprite: "<image key>"?,   // sprite for a spot (omit → a plain CSS blob)
+    brush: "<image key>"?,        // cursor sprite that follows the finger (optional)
+    spots: {
+      base: 4,                    // spots on the first cure
+      growEvery: 2, max: 12,      // +1 spot every N completions of this action (ramps up), capped
+      rubs: 3,                    // scrubs needed to remove one spot
+      size: 74,                   // spot size in px
+      area: { x, y, w, h },       // spawn region as 0..1 fractions of the stage (target the teeth)
+    },
+    finishParticles: ["⭐","💖"], // emojis bursting when the scene is cleared
+  },
+  effects:{ need:+/- }, reward?, stat?, message?, celebrateMessage?,
+}
+```
+Requires the `#closeup` overlay element in `index.html` and the `.closeup*` styles in
+`style.css` (both generic). Difficulty ramps via `state.stats[stat]` (number of past
+completions). The mood need reaching 100 via `effects` triggers `celebrate` in the
+world, so the cured creature visibly rejoices when you return.
 
 ### `zones` / `stations`
 ```

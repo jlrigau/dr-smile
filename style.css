@@ -202,3 +202,30 @@ input[type="text"]::placeholder { color: #a9bcc2; }
 .goal-txt { flex: 1; display: flex; flex-direction: column; line-height: 1.15; }
 .goal-txt small { color: var(--muted); }
 .goal-done { text-align: center; font-weight: bold; color: var(--teal-d); }
+
+/* ===== Close-up mini-scene (zoom on the mouth, scrub the spots) ===== */
+.closeup {
+  position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center;
+  padding: calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(120% 120% at 50% 0%, #ffe9f0 0%, rgba(255,233,240,0) 60%),
+    linear-gradient(180deg, #ffd9e6 0%, #ffeaf1 100%);
+  touch-action: none; -webkit-user-select: none; user-select: none;
+}
+.closeup-stage {
+  position: relative; width: min(94vw, 96vh); aspect-ratio: 5 / 4;
+  border-radius: 28px; overflow: hidden; touch-action: none;
+  box-shadow: 0 16px 40px rgba(220, 120, 150, 0.35);
+}
+.closeup-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; image-rendering: pixelated; pointer-events: none; -webkit-user-drag: none; }
+.cu-spot {
+  position: absolute; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)); cursor: pointer;
+  image-rendering: pixelated; -webkit-user-drag: none; touch-action: none;
+  transition: transform .09s ease, opacity .09s ease; will-change: transform, opacity;
+  filter: drop-shadow(0 2px 1px rgba(120, 90, 40, 0.25));
+}
+.closeup-brush { position: absolute; width: 92px; height: 92px; transform: translate(-38%, -64%); pointer-events: none; image-rendering: pixelated; z-index: 6; -webkit-user-drag: none; }
+.cu-emoji { position: absolute; transform: translate(-50%, -50%); font-size: 1.8rem; pointer-events: none; z-index: 7; animation: cuPop .9s ease-out forwards; }
+.cu-emoji.cu-burst { font-size: 2.4rem; animation: cuRise 1.2s ease-out forwards; }
+@keyframes cuPop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.3); } 30% { opacity: 1; transform: translate(-50%,-50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%,-90%) scale(1); } }
+@keyframes cuRise { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.4); } 25% { opacity: 1; transform: translate(-50%,-50%) scale(1.3); } 100% { opacity: 0; transform: translate(-50%,-220%) scale(1); } }

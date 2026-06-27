@@ -3,18 +3,16 @@
    ---------------------------------------------------------
    This file is the ENTIRE game: data + asset references.
    The engine (engine.js) contains no game content; it reads
-   this `window.GAME` object. Swap this file + assets to make
-   a brand-new game from the same engine.
+   this `window.GAME` object.
 
    Dr Smile — a gentle dentist game for a 6–7 year old who is
    starting to read (French). You are "Dr Smile" in a cosy
-   little clinic. Patients arrive a bit grumpy with dirty
-   teeth; you take care of them in 4 easy steps, always in the
-   same order, until their smile shines:
-     👀 Regarder → 🪥 Brosser → 💧 Rincer → ✨ Sourire
-   Each smile given = one star (🌟). No stress, no failure,
-   nothing scary. Collect "sticker" goals and climb the
-   ranks: Dr Smile débutant → confirmé → champion du sourire.
+   little clinic. Walk up to a patient, then the view ZOOMS
+   onto their open mouth: little stains appear on the teeth
+   and the child scrubs them off one by one with a finger.
+   When every tooth is clean → sparkles, the patient leaves
+   radiant, and you earn a star (🌟). No stress, no failure,
+   nothing scary, almost no text — it's all touch + visuals.
 
    All textures are generated (Pillow) and original (CC0).
    ========================================================= */
@@ -25,14 +23,16 @@ window.GAME = {
     title: "Dr Smile",
     titleIcon: "🦷",
     shortName: "Dr Smile",
-    tagline: "Prends soin des dents et rends tout le monde heureux !",
+    tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
-    audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools" },
-    assetVersion: "v1",
+    audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
+    assetVersion: "v2",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
-    coinIcon: "🌟",                    // "stars" earned, one per smile given
+    coinIcon: "🌟",                    // "stars": one per patient made to smile
+    showDay: false,                    // keep the HUD tiny for young kids
+    showCreatureCount: false,
 
     namePrompt: { label: "Nomme ton cabinet :", placeholder: "Cabinet Tout Sourire" },
     startName: "Mon cabinet",
@@ -40,17 +40,17 @@ window.GAME = {
     avatarPrompt: "Choisis ton ou ta dentiste",
     createTitle: "🦷 Choisis ton ou ta dentiste",
     createOkLabel: "✅ C'est parti !",
-    startLabel: "▶ Nouvelle partie",
+    startLabel: "▶ Jouer",
     continueLabel: "📂 Continuer",
-    continueHint: "Une partie est sauvegardée : appuie sur « Continuer ». 🦷",
+    continueHint: "Appuie sur « Continuer » pour reprendre. 🦷",
     helpTitle: "❓ Comment jouer",
     ageUnit: "", and: "et",
 
-    nightMessage: "✨ Les patients rentrent chez eux, tout fiers ! ✨",
+    nightMessage: "✨",
     restBlockedHint: "Occupe-toi d'abord d'un patient ! 😊",
-    neglectMessage: "🌅 Jour {day} : {names} ont hâte de voir Dr Smile ! 😄",
-    morningMessage: "🌅 Jour {day} : de nouveaux sourires t'attendent ! ✨",
-    idleHint: "Promène-toi 👣 et va voir un patient pour t'occuper de ses dents.",
+    neglectMessage: "🌅 De nouveaux patients arrivent ! 😄",
+    morningMessage: "🌅 De nouveaux sourires t'attendent ! ✨",
+    idleHint: "Va voir un patient pour t'occuper de ses dents ! 🦷",
   },
 
   /* ---- World: a small cosy clinic ---- */
@@ -67,6 +67,10 @@ window.GAME = {
       plant: "assets/img/plant.png",
       toothsign: "assets/img/toothsign.png",
       reception: "assets/img/reception.png",
+      // close-up mini-scene
+      mouth: "assets/img/mouth.png",
+      spot: "assets/img/spot.png",
+      brush: "assets/img/brush.png",
     },
     sheets: {
       drsmile: { path: "assets/sheet/drsmile.png", frameWidth: 64, frameHeight: 64 },
@@ -86,9 +90,9 @@ window.GAME = {
     { id: "rose", name: "Dr Rose", sheet: "drsmile_pink", thumb: "drsmile_pink_thumb" },
   ],
 
-  /* ---- Patients (the creature system): 4 gentle care steps, always in order ----
-     "propre" doubles as the cleanliness bar AND the step gate (each step needs the
-     previous one done). "sourire" is the mood: patients arrive grumpy and leave radiant. */
+  /* ---- Patients: one big tap-friendly action → the open-mouth mini-scene ----
+     "propre" + "sourire" drive the mood heart (grumpy red → radiant green) and
+     are filled to 100 when the mouth is fully cleaned. No bars, no reading. */
   creature: {
     label: "patients", icon: "🦷",
     sheet: "patient",
@@ -98,39 +102,26 @@ window.GAME = {
     moodIcon: "heart",
     moodNeed: "sourire",
     moodFrom: ["propre", "sourire"],
-    // overnight rule neutralised (decay handled by needs.perDay below)
     moodDay: { base: 0, lowPenalty: 0, lowAt: 0, highBonus: 0, highAt: 200 },
+    showBars: false,                  // young kids: rely on the mood heart, not bars
     needs: [
       { id: "propre", icon: "🦷", start: 0, perDay: -95 },   // arrives with dirty teeth
       { id: "sourire", icon: "😊", start: 25, perDay: -60 }, // arrives a bit grumpy
     ],
     actions: [
-      { id: "look", label: "Regarder", icon: "👀",
-        effects: { propre: 10, sourire: 8 }, stat: "look",
-        anim: { motion: "nod", particle: "bubble", colors: ["#bfe9ff", "#ffffff"], count: 4, y0: 40 },
-        message: "Oh, des petites taches sur les dents ! 🦷" },
-
-      { id: "brush", label: "Brosser", icon: "🪥",
-        require: { propre: 10 }, tooLow: "Regarde d'abord dans la bouche ! 👀",
-        effects: { propre: 40, sourire: 22 }, stat: "brush",
-        anim: { motion: "bounce", particle: "spark", colors: ["#ffffff", "#bff3ff", "#fff2a8"], count: 8, y0: 42 },
-        message: "Frotte frotte… les taches s'en vont ! ✨" },
-
-      { id: "rinse", label: "Rincer", icon: "💧",
-        require: { propre: 50 }, tooLow: "Brosse d'abord les dents ! 🪥",
-        effects: { propre: 50, sourire: 25 }, stat: "rinse",
-        anim: { motion: "nod", particle: "bubble", colors: ["#9fd8ff", "#d8f1ff", "#ffffff"], count: 9, y0: 44 },
-        message: "Glou glou… les dents brillent toutes blanches ! 💧" },
-
-      { id: "smile", label: "Sourire", icon: "✨",
-        require: { propre: 100 }, tooLow: "Rince d'abord les dents ! 💧",
-        effects: { sourire: 100 }, reward: 1, stat: "smile",
-        anim: { motion: "hop", particle: "star", colors: ["#fff2a8", "#ffd24a", "#ff9ec4", "#a8e6ff"], count: 10 },
-        message: "Quel beau sourire ! Tu gagnes une étoile ! 🌟",
-        celebrateMessage: "{name} rayonne de bonheur ! 💖🌟" },
+      { id: "treat", type: "closeup", label: "Soigner", icon: "🦷",
+        closeup: {
+          bg: "mouth", spotSprite: "spot", brush: "brush",
+          // spots ramp up as the child cures more patients (the progression)
+          spots: { base: 4, growEvery: 2, max: 8, rubs: 3, size: 64,
+                   area: { x: 0.30, y: 0.355, w: 0.40, h: 0.12 } },   // upper teeth only
+          finishParticles: ["⭐", "💖", "✨", "🌟", "😄"],
+        },
+        effects: { propre: 100, sourire: 100 }, reward: 1, stat: "smile",
+        message: "🌟",
+        celebrateMessage: "💖 Bravo ! {name} a un sourire tout neuf ! 🌟" },
     ],
-    celebrate: { mode: "hop", particle: "heart", colors: ["#ff9ec4", "#ffd24a", "#a8e6ff", "#7fd06f"], count: 10,
-      message: "💖 Hourra, un sourire tout neuf ! 💖" },
+    celebrate: { mode: "hop", particle: "heart", colors: ["#ff9ec4", "#ffd24a", "#a8e6ff", "#7fd06f"], count: 10 },
 
     // Different-coloured patients (tints of the one patient sheet) for variety.
     variants: [
@@ -157,11 +148,11 @@ window.GAME = {
       fence: false, tint: "#bfe6df", tintAlpha: 0.55, label: "Cabinet de Dr Smile" },
   ],
 
-  /* ---- Reception desk: ring the bell to welcome the next patients (new day) ---- */
+  /* ---- Reception desk: ring the bell to welcome new patients ---- */
   stations: [
     { type: "rest", x: 700, y: 165, sprite: "reception", scale: 1.0, label: "Accueil",
       box: { dx: -58, dy: -56, w: 116, h: 70 },
-      action: "nextDay", actionLabel: "🔔 Faire entrer les patients" },
+      action: "nextDay", actionLabel: "🔔 Nouveaux patients" },
   ],
 
   /* ---- Cosy scenery: the big chair (centrepiece) + plants & happy-tooth signs ---- */
@@ -175,36 +166,16 @@ window.GAME = {
     [1210, 520, "plant", 1.3, { dx: -12, dy: -8, w: 24, h: 12 }],
   ],
 
-  /* ---- Sticker album = goals; finishing a level is a little reward party ---- */
-  objectives: {
-    levels: [
-      { name: "Dr Smile débutant", goals: [
-        { id: "look1", name: "👀 Premier coup d'œil", desc: "Regarder dans une bouche", check: (s) => s.stats.look >= 1 },
-        { id: "brush1", name: "🪥 Brosse magique", desc: "Brosser des dents", check: (s) => s.stats.brush >= 1 },
-        { id: "smile1", name: "🌟 Premier sourire", desc: "Rendre un sourire", check: (s) => s.stats.smile >= 1 },
-      ] },
-      { name: "Dr Smile confirmé", goals: [
-        { id: "stars5", name: "🦷 Dent en or", desc: "Gagner 5 étoiles", check: (s) => s.coins >= 5 },
-        { id: "rinse5", name: "💧 Pro du rinçage", desc: "Rincer 5 fois", check: (s) => s.stats.rinse >= 5 },
-        { id: "radiant3", name: "💖 Trois sourires éclatants", desc: "Rendre 3 patients radieux", check: (s) => s.creatures.filter((c) => c.sourire >= 100).length >= 3 },
-      ] },
-      { name: "Champion du sourire", goals: [
-        { id: "stars12", name: "🌈 Brosse arc-en-ciel", desc: "Gagner 12 étoiles", check: (s) => s.coins >= 12 },
-        { id: "smile10", name: "🏆 Dix sourires", desc: "Rendre 10 sourires", check: (s) => s.stats.smile >= 10 },
-        { id: "allhappy", name: "😄 Cabinet tout heureux", desc: "Tout le monde radieux en même temps", check: (s) => s.creatures.length > 0 && s.creatures.every((c) => c.sourire >= 100) },
-      ] },
-    ],
-  },
+  /* ---- No objectives screen: too much reading for this age (kept off). ---- */
 
-  /* ---- Help screen (short sentences for early readers) ---- */
+  /* ---- Help screen (short sentences for early readers / a parent) ---- */
   help: [
     "<b>Bienvenue chez Dr Smile ! 🦷</b>",
-    "<b>👣 Bouge :</b> appuie où tu veux aller. Tu peux aussi appuyer sur un patient.",
-    "<b>🪑 Un patient :</b> va tout près, puis fais ses soins dans l'ordre :",
-    "<b>1) 👀 Regarder</b> · <b>2) 🪥 Brosser</b> · <b>3) 💧 Rincer</b> · <b>4) ✨ Sourire</b>",
-    "<b>🌟 Étoiles :</b> chaque sourire rendu te donne une étoile !",
-    "<b>🔔 Accueil :</b> sonne la cloche pour faire entrer de nouveaux patients.",
-    "<b>🎯 Autocollants :</b> gagne des autocollants et deviens champion du sourire !",
-    "<b>🦷 (en haut) :</b> change de dentiste. 💾 Le jeu se sauvegarde tout seul.",
+    "<b>👣 Va voir un patient</b> : appuie sur lui ou marche jusqu'à lui.",
+    "<b>🦷 Soigner</b> : la bouche s'ouvre en grand.",
+    "<b>🪥 Frotte les taches</b> avec ton doigt pour toutes les enlever !",
+    "<b>🌟 Bravo !</b> Le patient repart avec un beau sourire et tu gagnes une étoile.",
+    "<b>🔔 La cloche</b> fait entrer de nouveaux patients.",
+    "<b>🦷 (en haut)</b> : change de dentiste. 💾 Le jeu se sauvegarde tout seul.",
   ],
 };

@@ -178,6 +178,14 @@ function init() {
     else if (btn.dataset.place) placeDecor();
     else if (btn.dataset.cancelPlace) cancelPlacement();
   });
+
+  // Close-up mini-scene: scrub/tap spots (pointer works for both mouse & touch).
+  const cuStage = $("closeup-stage");
+  if (cuStage) {
+    cuStage.addEventListener("pointerdown", (e) => { if (!closeupOpen || !cuState) return; e.preventDefault(); cuState.pressed = true; cuMoveBrush(e); cuRub(e); });
+    cuStage.addEventListener("pointermove", (e) => { if (!closeupOpen) return; cuMoveBrush(e); if (cuState && cuState.pressed) cuRub(e); });
+    window.addEventListener("pointerup", () => { if (cuState) cuState.pressed = false; });
+  }
 }
 
 // Inject configured labels/titles into the static HTML shell.
@@ -272,8 +280,8 @@ function buildHud() {
   (SHOP.resources || []).forEach((r) => {
     html += `<span class="resource" title="${r.name}">${r.icon || "📦"} <b id="hud-res-${r.id}">0</b></span>`;
   });
-  html += `<span class="resource" title="Day">📅 <b id="hud-day">1</b></span>`;
-  if (CREATURE) html += `<span class="resource" title="${CREATURE.label || "creatures"}">${CREATURE.icon || "🐾"} <b id="hud-cap">0/0</b></span>`;
+  if (META.showDay !== false) html += `<span class="resource" title="Day">📅 <b id="hud-day">1</b></span>`;
+  if (CREATURE && META.showCreatureCount !== false) html += `<span class="resource" title="${CREATURE.label || "creatures"}">${CREATURE.icon || "🐾"} <b id="hud-cap">0/0</b></span>`;
   if (LEVELS.length) html += `<span class="resource" title="Level">⭐ <b id="hud-level">1</b></span>`;
   bar.innerHTML = html;
 }
@@ -366,6 +374,7 @@ let rideFatigueAcc = 0;
 let jumpRunning = false;
 const jumpAnim = { h: 0 };
 let activeTarget = null, panelId = null, mounted = null;
+let closeupOpen = false, cuState = null;     // generic close-up mini-scene
 let selRing = null;
 let decorObjs = [];
 let COLLISIONS = [];
@@ -767,7 +776,7 @@ function animatePlayer(mvx, mvy) {
 function sceneUpdate(time, delta) {
   if (!player) return;
   const dt = Math.min(delta / 1000, 0.05);
-  const modalOpen = !$("modal").classList.contains("hidden") || nightRunning;
+  const modalOpen = !$("modal").classList.contains("hidden") || nightRunning || closeupOpen;
 
   let vx = 0, vy = 0;
   if (!modalOpen) {
@@ -906,7 +915,7 @@ function isCreature(t) { return t && t.variant !== undefined && !t.station; }
 /* ===================== Pointer ===================== */
 
 function onPointer(p) {
-  if (!$("modal").classList.contains("hidden")) return;
+  if (!$("modal").classList.contains("hidden") || closeupOpen) return;
   const wx = p.worldX, wy = p.worldY;
   const tnow = (typeof performance !== "undefined" ? performance.now() : Date.now());
   running = (tnow - lastTapT) < 350;
@@ -949,7 +958,7 @@ function buildPanel() {
         + `<button class="btn btn-secondary" data-creature="${rideAct.id}">🛑 ${rideAct.dismountLabel || "Get off"}</button>`;
     } else {
       actions = ACTIONS.filter((a) => a.type !== "jump").map((a) => {
-        const cls = a.type === "ride" ? "btn btn-accent" : (a.type === "customize" ? "btn btn-secondary" : "btn");
+        const cls = a.type === "ride" ? "btn btn-accent" : (a.type === "customize" ? "btn btn-secondary" : (a.type === "closeup" ? "btn btn-giant" : "btn"));
         return `<button class="${cls}" data-creature="${a.id}">${a.icon || ""} ${a.label}</button>`;
       }).join("");
     }
@@ -958,7 +967,7 @@ function buildPanel() {
       : "";
     p.innerHTML = `
       <div class="pc-head"><div><b>${c.name}</b> <span class="pc-sub">${ageTxt}</span></div></div>
-      <div class="pc-bars" id="pc-bars"></div>
+      ${CREATURE.showBars === false ? "" : '<div class="pc-bars" id="pc-bars"></div>'}
       <div class="pc-actions">${actions}</div>`;
     refreshBars(c);
   } else {
@@ -996,6 +1005,7 @@ function creatureAction(actionId) {
   if (a.type === "ride") { toggleRide(c); return; }
   if (a.type === "jump") { doJump(); return; }
   if (a.type === "customize") { openCustomize(c); return; }
+  if (a.type === "closeup") { openCloseup(c, a); return; }
 
   // resource cost
   if (a.cost) {
@@ -1401,6 +1411,114 @@ function openCustomize(c) {
     message((CREATURE.customizedMessage || "{name} updated! 🎨").replace("{name}", c.name));
   });
   drawPreview();
+}
+
+/* ===================== Close-up mini-scene (generic) ===================== */
+// A creature action of type "closeup" opens a full-screen scene: the player
+// scrubs/taps "spots" off a backdrop image until it's clean, then the action's
+// effects / reward / celebrate are applied (exactly like finishing a normal
+// action). Entirely config-driven via action.closeup — see ENGINE.md.
+function openCloseup(c, a) {
+  const root = $("closeup"); if (!root || !a) return;
+  const cfg = a.closeup || {};
+  const stage = $("closeup-stage"), bg = $("closeup-bg"), brush = $("closeup-brush");
+  const imgPath = (k, def) => av((G.assets.images && G.assets.images[k]) || ("assets/img/" + (k || def) + ".png"));
+  if (bg) bg.src = imgPath(cfg.bg, "closeup");
+  stage.querySelectorAll(".cu-spot, .cu-emoji").forEach((n) => n.remove());
+
+  const sp = cfg.spots || {};
+  const cured = (a.stat && state.stats[a.stat]) || 0;       // ramps difficulty with progress
+  const base = sp.base || 4, grow = sp.growEvery || 0, max = sp.max || 10;
+  const count = clamp(base + (grow ? Math.floor(cured / grow) : 0), 1, max);
+  const rubs = sp.rubs || 3, size = sp.size || 64;
+  const area = sp.area || { x: 0.18, y: 0.42, w: 0.64, h: 0.28 };
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement(cfg.spotSprite ? "img" : "div");
+    s.className = "cu-spot";
+    if (cfg.spotSprite) s.src = imgPath(cfg.spotSprite, "spot");
+    s.style.left = ((area.x + Math.random() * area.w) * 100).toFixed(2) + "%";
+    s.style.top = ((area.y + Math.random() * area.h) * 100).toFixed(2) + "%";
+    s.style.width = size + "px"; s.style.height = size + "px";
+    s.style.setProperty("--rot", Math.floor(Math.random() * 360) + "deg");
+    s.dataset.rubs0 = String(rubs); s.dataset.rubs = String(rubs); s.dataset.t = "0";
+    stage.appendChild(s);
+  }
+  if (brush) {
+    if (cfg.brush) { brush.src = imgPath(cfg.brush, "brush"); brush.classList.remove("hidden"); }
+    else brush.classList.add("hidden");
+  }
+  cuState = { c, a, remaining: count, pressed: false };
+  closeupOpen = true;
+  root.classList.remove("hidden");
+  themeColor((META.theme && META.theme.play) || TINT_PLAY);
+}
+
+function cuMoveBrush(e) {
+  const brush = $("closeup-brush"); if (!brush || brush.classList.contains("hidden")) return;
+  const r = $("closeup-stage").getBoundingClientRect();
+  brush.style.left = (e.clientX - r.left) + "px";
+  brush.style.top = (e.clientY - r.top) + "px";
+}
+
+function cuRub(e) {
+  if (!cuState) return;
+  const t = e.target;
+  if (!t || !t.classList || !t.classList.contains("cu-spot")) return;
+  const now = (typeof performance !== "undefined" ? performance.now() : Date.now());
+  if (now - (parseFloat(t.dataset.t) || 0) < 90) return;    // cooldown so a single scrub isn't instant
+  t.dataset.t = String(now);
+  const left = (parseInt(t.dataset.rubs, 10) || 1) - 1;
+  t.dataset.rubs = String(left);
+  const f = Math.max(0, left) / (parseInt(t.dataset.rubs0, 10) || 1);
+  t.style.opacity = (0.25 + 0.75 * f).toFixed(2);
+  t.style.transform = `translate(-50%,-50%) rotate(var(--rot)) scale(${(0.4 + 0.6 * f).toFixed(2)})`;
+  if (left <= 0) cuPop(t);
+}
+
+function cuPop(spot) {
+  cuEmoji(spot.style.left, spot.style.top, ["✨", "⭐"], false);
+  spot.remove();
+  if (!cuState) return;
+  cuState.remaining = Math.max(0, cuState.remaining - 1);
+  if (cuState.remaining === 0) cuFinish();
+}
+
+function cuEmoji(left, top, glyphs, burst) {
+  const stage = $("closeup-stage"); if (!stage) return;
+  glyphs.forEach((g, k) => {
+    const e = document.createElement("div");
+    e.className = "cu-emoji" + (burst ? " cu-burst" : "");
+    e.textContent = g; e.style.left = left; e.style.top = top;
+    e.style.animationDelay = (burst ? Math.floor(Math.random() * 250) : k * 70) + "ms";
+    stage.appendChild(e); setTimeout(() => e.remove(), 1300);
+  });
+}
+
+function cuFinish() {
+  const { c, a } = cuState;
+  const parts = (a.closeup && a.closeup.finishParticles) || ["⭐", "💖", "✨", "🌟"];
+  for (let i = 0; i < 16; i++) cuEmoji((10 + Math.random() * 80) + "%", (18 + Math.random() * 55) + "%", [parts[i % parts.length]], true);
+  setTimeout(() => { closeCloseup(); cuApply(c, a); }, 950);
+}
+
+// Apply the action's outcome — mirrors the tail of creatureAction().
+function cuApply(c, a) {
+  const moodBefore = MOOD_NEED ? (c[MOOD_NEED] || 0) : 0;
+  Object.keys(a.effects || {}).forEach((k) => { c[k] = clamp01((c[k] || 0) + a.effects[k]); });
+  if (a.reward) state.coins += a.reward;
+  state.actionsSinceRest = (state.actionsSinceRest || 0) + 1;
+  if (a.stat) state.stats[a.stat] = (state.stats[a.stat] || 0) + 1;
+  let celebrated = false;
+  if (MOOD_NEED && CREATURE.celebrate && (!CREATURE.celebrate.adultsOnly || !isYoung(c)) && moodBefore < 100 && (c[MOOD_NEED] || 0) >= 100) {
+    if (sc) sc.time.delayedCall(250, () => celebrate(c)); celebrated = true;
+  }
+  if (a.message) message((celebrated && a.celebrateMessage ? a.celebrateMessage : a.message).replace("{name}", c.name));
+  refreshBars(c); refreshHud(); panelId = null; refreshInteraction();
+}
+
+function closeCloseup() {
+  const root = $("closeup"); if (root) root.classList.add("hidden");
+  closeupOpen = false; cuState = null;
 }
 
 /* ===================== Goals / help ===================== */

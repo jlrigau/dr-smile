@@ -14,9 +14,12 @@ reused from any other game's art. They are dedicated to the public domain (**CC0
 | Potted plant | `assets/img/plant.png` | scenery |
 | Happy-tooth sign | `assets/img/toothsign.png` | scenery |
 | Reception desk | `assets/img/reception.png` | "next patients" station (heart sign + bell) |
+| Open-mouth backdrop | `assets/img/mouth.png` | close-up mini-scene (friendly cartoon mouth + teeth) |
+| Dirt spot | `assets/img/spot.png` | scrubbable stain in the close-up |
+| Toothbrush cursor | `assets/img/brush.png` | follows the finger in the close-up |
 | App icons | `assets/favicon.png`, `assets/apple-touch-icon.png` | smiling tooth |
 
-Generation: Pillow scripts (`gen_chars.py`, `gen_world.py`), kept with the session.
+Generation: Pillow scripts in `tools/` (`gen_chars.py`, `gen_world.py`, `gen_closeup.py`).
 
 ## Engine dependency
 - **Phaser 3** (v3.80.1) is vendored at `vendor/phaser.min.js` — MIT license,
