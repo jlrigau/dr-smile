@@ -212,6 +212,13 @@ input[type="text"]::placeholder { color: #a9bcc2; }
     linear-gradient(180deg, #ffd9e6 0%, #ffeaf1 100%);
   touch-action: none; -webkit-user-select: none; user-select: none;
 }
+.closeup-close {
+  position: absolute; top: calc(10px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right));
+  z-index: 10; width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
+  background: #fff; color: var(--pink); font-size: 1.3rem; font-weight: bold;
+  box-shadow: 0 4px 0 #ef7ba0; line-height: 1;
+}
+.closeup-close:active { transform: translateY(3px); box-shadow: 0 0 0 #ef7ba0; }
 .closeup-stage {
   position: relative; width: min(94vw, 96vh); aspect-ratio: 5 / 4;
   border-radius: 28px; overflow: hidden; touch-action: none;

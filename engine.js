@@ -186,6 +186,8 @@ function init() {
     cuStage.addEventListener("pointermove", (e) => { if (!closeupOpen) return; cuMoveBrush(e); if (cuState && cuState.pressed) cuRub(e); });
     window.addEventListener("pointerup", () => { if (cuState) cuState.pressed = false; });
   }
+  const cuClose = $("closeup-close");
+  if (cuClose) cuClose.addEventListener("click", () => closeCloseup());
 }
 
 // Inject configured labels/titles into the static HTML shell.
@@ -1518,7 +1520,15 @@ function cuApply(c, a) {
 
 function closeCloseup() {
   const root = $("closeup"); if (root) root.classList.add("hidden");
+  const stage = $("closeup-stage"); if (stage) stage.querySelectorAll(".cu-spot, .cu-emoji").forEach((n) => n.remove());
   closeupOpen = false; cuState = null;
+  // Make sure the world is fully interactive again (belt-and-braces: clear any
+  // transient input/movement state and re-assert camera follow + keyboard).
+  moveTarget = null; pendingInteract = null; followCreature = null;
+  running = false; jumpRunning = false;
+  themeColor((META.theme && META.theme.play) || TINT_PLAY);
+  if (sc && sc.input && sc.input.keyboard) { sc.input.keyboard.enabled = true; sc.input.keyboard.resetKeys(); }
+  if (sc && player) sc.cameras.main.startFollow(player, true, 0.5, 0.5);
 }
 
 /* ===================== Goals / help ===================== */
