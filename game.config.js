@@ -26,7 +26,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v5",
+    assetVersion: "v6",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
@@ -67,8 +67,13 @@ window.GAME = {
       plant: "assets/img/plant.png",
       toothsign: "assets/img/toothsign.png",
       reception: "assets/img/reception.png",
-      // close-up mini-scene
-      mouth: "assets/img/mouth.png",
+      // close-up mini-scene: one face backdrop per child + the spot & brush
+      mouth_leo: "assets/img/mouth_leo.png",
+      mouth_mila: "assets/img/mouth_mila.png",
+      mouth_sacha: "assets/img/mouth_sacha.png",
+      mouth_lou: "assets/img/mouth_lou.png",
+      mouth_tom: "assets/img/mouth_tom.png",
+      mouth_zoe: "assets/img/mouth_zoe.png",
       spot: "assets/img/spot.png",
       brush: "assets/img/brush.png",
     },
@@ -117,10 +122,10 @@ window.GAME = {
     actions: [
       { id: "treat", type: "closeup", label: "Soigner", icon: "🦷",
         closeup: {
-          bg: "mouth", spotSprite: "spot", brush: "brush",
+          bg: "mouth_leo", spotSprite: "spot", brush: "brush",   // bg overridden per child (variant.closeupBg)
           // spots ramp up as the child cures more patients (the progression)
-          spots: { base: 4, growEvery: 2, max: 8, rubs: 3, size: 64,
-                   area: { x: 0.30, y: 0.375, w: 0.40, h: 0.09 } },   // upper teeth only
+          spots: { base: 4, growEvery: 2, max: 8, rubs: 3, size: 60,
+                   area: { x: 0.36, y: 0.455, w: 0.28, h: 0.07 } },   // upper teeth only
           finishParticles: ["⭐", "💖", "✨", "🌟", "😄"],
         },
         effects: { propre: 100, sourire: 100 }, reward: 1, stat: "smile",
@@ -131,12 +136,12 @@ window.GAME = {
 
     // The child patients: boys & girls, each its own sprite (animated per-variant).
     variants: [
-      { id: "leo", name: "Léo", sheet: "kid_leo", color: "#5aa9e6" },     // boy
-      { id: "mila", name: "Mila", sheet: "kid_mila", color: "#ff8fb3" },  // girl
-      { id: "sacha", name: "Sacha", sheet: "kid_sacha", color: "#6cc47a" }, // boy
-      { id: "lou", name: "Lou", sheet: "kid_lou", color: "#ffd24a" },     // girl
-      { id: "tom", name: "Tom", sheet: "kid_tom", color: "#ef6a6a" },     // boy
-      { id: "zoe", name: "Zoé", sheet: "kid_zoe", color: "#b48ae6" },     // girl
+      { id: "leo", name: "Léo", sheet: "kid_leo", closeupBg: "mouth_leo", color: "#5aa9e6" },       // boy
+      { id: "mila", name: "Mila", sheet: "kid_mila", closeupBg: "mouth_mila", color: "#ff8fb3" },   // girl
+      { id: "sacha", name: "Sacha", sheet: "kid_sacha", closeupBg: "mouth_sacha", color: "#6cc47a" }, // boy
+      { id: "lou", name: "Lou", sheet: "kid_lou", closeupBg: "mouth_lou", color: "#ffd24a" },       // girl
+      { id: "tom", name: "Tom", sheet: "kid_tom", closeupBg: "mouth_tom", color: "#ef6a6a" },       // boy
+      { id: "zoe", name: "Zoé", sheet: "kid_zoe", closeupBg: "mouth_zoe", color: "#b48ae6" },       // girl
     ],
 
     names: ["Léo", "Mila", "Sacha", "Lou", "Tom", "Zoé", "Nina", "Hugo", "Jade", "Sami", "Lina", "Noé"],

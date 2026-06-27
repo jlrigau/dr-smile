@@ -1433,7 +1433,11 @@ function openCloseup(c, a) {
   const cfg = a.closeup || {};
   const stage = $("closeup-stage"), bg = $("closeup-bg"), brush = $("closeup-brush");
   const imgPath = (k, def) => av((G.assets.images && G.assets.images[k]) || ("assets/img/" + (k || def) + ".png"));
-  if (bg) bg.src = imgPath(cfg.bg, "closeup");
+  // The backdrop can be overridden per creature variant (e.g. each child's own face).
+  const cv = variantDef(variantId(c));
+  const src = imgPath((cv && cv.closeupBg) || cfg.bg, "closeup");
+  if (bg) bg.src = src;
+  root.style.backgroundImage = "url('" + src + "')";   // fills the margins (blurred via CSS)
   stage.querySelectorAll(".cu-spot, .cu-emoji").forEach((n) => n.remove());
 
   const sp = cfg.spots || {};
@@ -1527,7 +1531,7 @@ function cuApply(c, a) {
 }
 
 function closeCloseup() {
-  const root = $("closeup"); if (root) root.classList.add("hidden");
+  const root = $("closeup"); if (root) { root.classList.add("hidden"); root.style.backgroundImage = ""; }
   const stage = $("closeup-stage"); if (stage) stage.querySelectorAll(".cu-spot, .cu-emoji").forEach((n) => n.remove());
   closeupOpen = false; cuState = null;
   // Make sure the world is fully interactive again (belt-and-braces: clear any

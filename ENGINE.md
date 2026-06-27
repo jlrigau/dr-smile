@@ -129,7 +129,8 @@ mouth, wash a pet, polish a gem, wipe a window, etc.
 action = {
   id, type:"closeup", label, icon,
   closeup: {
-    bg: "<image key>",            // full-screen backdrop (e.g. an open mouth)
+    bg: "<image key>",            // full-screen backdrop (e.g. a face) — overridable per
+                                  //   creature via `variant.closeupBg` (e.g. each child's own face)
     spotSprite: "<image key>"?,   // sprite for a spot (omit → a plain CSS blob)
     brush: "<image key>"?,        // cursor sprite that follows the finger (optional)
     spots: {
