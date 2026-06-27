@@ -1,29 +1,23 @@
 # Asset credits
 
-The engine ships a minimal demo game, **Nebula Nursery**. **All of its textures are
-generated procedurally** and original to this repo — nothing is reused from any other
-game's art. They are dedicated to the public domain (**CC0**).
+This game, **Dr Smile**, runs on the generic engine in this repo. **All of its textures
+are generated procedurally** with Pillow and are original to this repo — nothing is
+reused from any other game's art. They are dedicated to the public domain (**CC0**).
 
 | Asset | File | Notes |
 | --- | --- | --- |
-| Metal/starfield ground | `assets/img/ground.png` | tileable |
-| Neon energy floor | `assets/img/energy.png` | tileable path/patch |
-| Keeper robot (2 colours) | `assets/sheet/keeper.png`, `keeper_amber.png` | 64×64 walkcycle (hovering) |
-| Keeper thumbnails | `assets/ui/keeper_thumb.png`, `keeper_amber_thumb.png` | menu portraits |
-| Alien critter | `assets/sheet/critter.png` | 64×64, 4-frame bob; recoloured by tint if variants are added |
-| Energy barrier | `assets/sheet/fence.png` | 32×32 glowing posts |
-| Recharge pod | `assets/img/pod_rest.png` | sci-fi building |
-| Crystal, alien plant | `assets/img/crystal.png`, `alienplant.png` | scenery |
-| App icons | `assets/favicon.png`, `assets/apple-touch-icon.png` | generated |
+| Dr Smile (2 colours) | `assets/sheet/drsmile.png`, `drsmile_pink.png` | 64×64 LPC walkcycle (white coat, head-mirror) |
+| Dr Smile thumbnails | `assets/ui/drsmile_thumb.png`, `drsmile_pink_thumb.png` | menu portraits |
+| Patient | `assets/sheet/patient.png` | 64×64, 4-frame bob; recoloured by tint per variant |
+| Clinic floor | `assets/img/floor.png` | tileable pastel tiles |
+| Dental chair | `assets/img/chair.png` | cosy pastel centrepiece (water cup, no scary tools) |
+| Potted plant | `assets/img/plant.png` | scenery |
+| Happy-tooth sign | `assets/img/toothsign.png` | scenery |
+| Reception desk | `assets/img/reception.png` | "next patients" station (heart sign + bell) |
+| App icons | `assets/favicon.png`, `assets/apple-touch-icon.png` | smiling tooth |
 
-Generation script: Pillow (see commit history / the `new-game` skill for how the demo's
-textures and icons are produced).
+Generation: Pillow scripts (`gen_chars.py`, `gen_world.py`), kept with the session.
 
 ## Engine dependency
 - **Phaser 3** (v3.80.1) is vendored at `vendor/phaser.min.js` — MIT license,
   © Phaser Studio / Richard Davey.
-
-## Making your own game
-When you build a different game on this engine, source or generate your own textures
-(see the **asset-search** / **asset-add** skills) and credit any third-party assets
-here with their author + license.
