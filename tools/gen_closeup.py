@@ -45,13 +45,16 @@ def mouth():
             else:
                 d.ellipse((bx+10, y0+4, bx+w-10, y0+20), fill=tshade)
 
-    # upper + lower rows; a dark gap at the centre reads as the open mouth
-    teeth_row(cy-150, cy-8, 8, 250, upper=True)
-    teeth_row(cy+30, cy+158, 7, 228, upper=False)
+    # Anatomy: upper teeth (top), then the TONGUE in the middle of the mouth, then the
+    # lower teeth drawn IN FRONT of the tongue's base (the tongue tucks behind them).
+    teeth_row(cy-158, cy-38, 8, 250, upper=True)
 
-    # tongue peeking below the lower teeth
-    d.ellipse((cx-150, cy+150, cx+150, cy+274), fill=(255, 150, 165, 255), outline=(228, 120, 140, 255), width=5)
-    d.line((cx, cy+170, cx, cy+250), fill=(228, 120, 140, 255), width=5)
+    # tongue resting in the middle, between the two jaws
+    d.ellipse((cx-152, cy-18, cx+152, cy+128), fill=(255, 148, 164, 255), outline=(226, 116, 138, 255), width=5)
+    d.ellipse((cx-150, cy-16, cx+150, cy+40), fill=(255, 168, 182, 255))   # soft highlight on top
+    d.line((cx, cy+6, cx, cy+104), fill=(226, 116, 138, 255), width=5)
+
+    teeth_row(cy+86, cy+176, 7, 226, upper=False)
 
     im.save(OUT + "/img/mouth.png")
 
