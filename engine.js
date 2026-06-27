@@ -1445,15 +1445,18 @@ function openCloseup(c, a) {
   const base = sp.base || 4, grow = sp.growEvery || 0, max = sp.max || 10;
   const count = clamp(base + (grow ? Math.floor(cured / grow) : 0), 1, max);
   const rubs = sp.rubs || 3, size = sp.size || 64;
-  const area = sp.area || { x: 0.18, y: 0.42, w: 0.64, h: 0.28 };
+  // `area` may be one region or several (e.g. upper + lower teeth); spots alternate
+  // between them so every region gets some.
+  const areas = Array.isArray(sp.area) ? sp.area : [sp.area || { x: 0.18, y: 0.42, w: 0.64, h: 0.28 }];
   for (let i = 0; i < count; i++) {
+    const ar = areas[i % areas.length];
     const s = document.createElement(cfg.spotSprite ? "img" : "div");
     s.className = "cu-spot";
     if (cfg.spotSprite) s.src = imgPath(cfg.spotSprite, "spot");
     // store the spot's position/size as fractions of the BACKDROP IMAGE; it's mapped
     // to screen pixels in cuPlaceSpots() so it stays on the teeth under object-fit:cover.
-    s.dataset.fx = (area.x + Math.random() * area.w).toFixed(4);
-    s.dataset.fy = (area.y + Math.random() * area.h).toFixed(4);
+    s.dataset.fx = (ar.x + Math.random() * ar.w).toFixed(4);
+    s.dataset.fy = (ar.y + Math.random() * ar.h).toFixed(4);
     s.dataset.sz = String(size);
     s.style.setProperty("--rot", Math.floor(Math.random() * 360) + "deg");
     s.dataset.rubs0 = String(rubs); s.dataset.rubs = String(rubs); s.dataset.t = "0";

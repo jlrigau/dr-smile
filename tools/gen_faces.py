@@ -69,23 +69,34 @@ def draw_face(skin, hair, style, eye):
     d.ellipse((CX - 312, cy - 180, CX + 312, cy + 196), fill=lipD)
     d.ellipse((CX - RX, cy - RY, CX + RX, cy + RY), fill=(150, 70, 86, 255))
 
-    gum = mix(skin, (210, 96, 116, 255), 0.5)
-    tooth = (255, 255, 255, 255); tline = (208, 216, 224, 255); tshade = (228, 236, 242, 255)
-    def teeth_row(y0, y1, n, span, upper=True):
-        x0, x1 = CX - span, CX + span; w = (x1 - x0) / n
-        if upper: d.rounded_rectangle((x0 - 18, y0 - 36, x1 + 18, y0 + 42), 28, fill=gum)
-        else:     d.rounded_rectangle((x0 - 18, y1 - 42, x1 + 18, y1 + 36), 28, fill=gum)
-        for i in range(n):
-            bx = x0 + i * w
-            d.rounded_rectangle((bx + 5, y0, bx + w - 5, y1), 19, fill=tooth, outline=tline, width=3)
-            d.line((bx + w*0.5, y0 + 10, bx + w*0.5, y1 - 10), fill=(238, 244, 248, 255), width=2)
-            if upper: d.ellipse((bx + 11, y1 - 22, bx + w - 11, y1 - 5), fill=tshade)
-            else:     d.ellipse((bx + 11, y0 + 5, bx + w - 11, y0 + 22), fill=tshade)
-    teeth_row(cy - 176, cy - 40, 7, 184, upper=True)
-    d.ellipse((CX - 172, cy - 14, CX + 172, cy + 134), fill=(235, 140, 158, 255), outline=(214, 116, 134, 255), width=5)
-    d.ellipse((CX - 170, cy - 12, CX + 170, cy + 46), fill=(246, 162, 178, 255))
-    d.line((CX, cy + 6, CX, cy + 112), fill=(214, 116, 134, 255), width=5)
-    teeth_row(cy + 56, cy + 182, 6, 162, upper=False)
+    gum = mix(skin, (210, 96, 116, 255), 0.5); gumD = dark(gum, 0.88)
+    tooth = (252, 252, 250, 255); tline = (214, 220, 226, 255); tshade = (228, 235, 242, 255)
+    def teeth_row(y0, y1, weights, span, upper=True):
+        # real-ish teeth: varied widths (incisors wider), touching, rounded biting edge,
+        # emerging from a gum that covers the roots; soft per-tooth shading.
+        total = float(sum(weights)); x = CX - span; cells = []
+        for wgt in weights:
+            tw = 2 * span * wgt / total; cells.append((x, x + tw)); x += tw
+        for (xa, xb) in cells:
+            r = int(min(14, (xb - xa) / 2.6))
+            d.rounded_rectangle((int(xa) + 1, int(y0), int(xb) - 1, int(y1)), radius=r, fill=tooth, outline=tline, width=2)
+            d.line((int(xa) + 6, int(y0) + 8, int(xa) + 6, int(y1) - 12), fill=(255, 255, 255, 255), width=3)   # highlight
+            d.line((int(xb) - 4, int(y0) + 6, int(xb) - 4, int(y1) - 8), fill=(214, 222, 230, 255), width=2)    # side shadow
+            if upper: d.ellipse((int(xa) + 5, int(y1) - 18, int(xb) - 5, int(y1) - 3), fill=tshade)             # biting-edge shade
+            else:     d.ellipse((int(xa) + 5, int(y0) + 3, int(xb) - 5, int(y0) + 18), fill=tshade)
+        if upper:
+            d.rounded_rectangle((CX - span - 16, y0 - 46, CX + span + 16, y0 + 20), 26, fill=gum)
+            d.line((CX - span - 4, y0 + 20, CX + span + 4, y0 + 20), fill=gumD, width=3)
+        else:
+            d.rounded_rectangle((CX - span - 16, y1 - 20, CX + span + 16, y1 + 46), 26, fill=gum)
+            d.line((CX - span - 4, y1 - 20, CX + span + 4, y1 - 20), fill=gumD, width=3)
+    UW = [0.9, 1.05, 1.25, 1.25, 1.05, 0.9]; LW = [1.0, 1.2, 1.3, 1.2, 1.0]
+    teeth_row(cy - 150, cy - 56, UW, 206, upper=True)
+    # tongue resting between the jaws
+    d.ellipse((CX - 168, cy - 6, CX + 168, cy + 128), fill=(235, 140, 158, 255), outline=(214, 116, 134, 255), width=5)
+    d.ellipse((CX - 166, cy - 4, CX + 166, cy + 52), fill=(246, 162, 178, 255))
+    d.line((CX, cy + 8, CX, cy + 108), fill=(214, 116, 134, 255), width=5)
+    teeth_row(cy + 60, cy + 150, LW, 182, upper=False)
 
     # chin highlight
     d.ellipse((CX - 150, 930, CX + 150, 1130), fill=mix(skin, (255, 255, 255, 255), 0.07))

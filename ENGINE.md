@@ -140,7 +140,9 @@ action = {
       size: 74,                   // spot size in px
       area: { x, y, w, h },       // spawn region as 0..1 fractions of the BACKDROP IMAGE
                                   //   (the backdrop fills the screen via object-fit:cover;
-                                  //    spots are placed cover-aware so they stay on the teeth)
+                                  //    spots are placed cover-aware so they stay on the teeth).
+                                  //   May be an ARRAY of regions (e.g. upper + lower teeth) —
+                                  //   spots alternate between them so each region gets some.
     },
     finishParticles: ["⭐","💖"], // emojis bursting when the scene is cleared
   },
