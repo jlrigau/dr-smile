@@ -26,7 +26,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v6",
+    assetVersion: "v7",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
@@ -125,7 +125,7 @@ window.GAME = {
           bg: "mouth_leo", spotSprite: "spot", brush: "brush",   // bg overridden per child (variant.closeupBg)
           // spots ramp up as the child cures more patients (the progression)
           spots: { base: 4, growEvery: 2, max: 8, rubs: 3, size: 60,
-                   area: { x: 0.36, y: 0.455, w: 0.28, h: 0.07 } },   // upper teeth only
+                   area: { x: 0.345, y: 0.54, w: 0.31, h: 0.07 } },   // big upper teeth
           finishParticles: ["⭐", "💖", "✨", "🌟", "😄"],
         },
         effects: { propre: 100, sourire: 100 }, reward: 1, stat: "smile",
