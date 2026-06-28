@@ -218,6 +218,7 @@ function applyStaticText() {
   const setHTML = (id, html) => { const el = $(id); if (el != null && html != null) el.innerHTML = html; };
   document.title = META.title || "Game";
   setHTML("home-title", (META.titleIcon ? META.titleIcon + " " : "") + (META.title || "Game"));
+  set("place-icon", META.titleIcon || "");                 // in-game HUD clinic icon (generic shell)
   set("home-tagline", META.tagline || "");
   set("home-name-label", (META.namePrompt && META.namePrompt.label) || "Name your place:");
   const inp = $("place-name-input"); if (inp && META.namePrompt) inp.placeholder = META.namePrompt.placeholder || "";
