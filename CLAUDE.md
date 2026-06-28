@@ -60,7 +60,9 @@ core loop) and **feedback-session** (non-technical playtester mode, silent work)
 Editing: add-character, add-creature-variant, add-decor-item, add-collision,
 place-scatter, state-migration. Assets: asset-search (content policy via
 `GAME.meta.audience` + license), asset-add. QA/ship: test-debug, map-verify,
-ios-pwa-check, release-deploy. Shared tooling in `_shared/`.
+ios-pwa-check, release-deploy. **capitalize-learnings** (run after every feature/bugfix:
+fold the learnings back into the engine/skills/docs and audit the separation). Shared
+tooling in `_shared/` (incl. `separation-audit.cjs`).
 
 ## 8. Conventions
 - Engine, config and skills are in **English**. Clear commit messages.

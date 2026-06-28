@@ -9,6 +9,7 @@ run by Claude Code through the **Bash** tool.
 | `serve.sh` | Serve the game statically: `bash .claude/skills/_shared/serve.sh [port]` (def. 8099). |
 | `bump-version.mjs` | Bump the cache version `vN` in **both places** (`assetVersion` in game.config.js + every `?v=` in index.html). `node .claude/skills/_shared/bump-version.mjs`. |
 | `playtest.cjs` | Headless Playwright harness: starts a game, takes zone screenshots (`--shots`), checks trail-loop walkability (`--walk`), evaluates expressions (`--eval`), runs assertions (`--probe`), picks the browser engine (`--engine`) and emulates a device (`--device`), and **reports page errors**. |
+| `separation-audit.cjs` | Prove the engine/game boundary: engine.js has no game text, game.config.js no engine logic, the shell body stays neutral. `node .claude/skills/_shared/separation-audit.cjs` (exit ≠ 0 on a likely leak). Used by **capitalize-learnings**. |
 
 ## Requirements
 - `python3` (static server), `node` + **Playwright** (Chromium); for asset skills:
