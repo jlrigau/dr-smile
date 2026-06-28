@@ -83,13 +83,14 @@ def tooth_sign():
     rr(d, (cx-6, H-60, cx+6, H-12), 4, fill=(150,120,90,255))
     # board (soft mint panel)
     rr(d, (cx-52, 12, cx+52, H-52), 16, fill=(233,248,243,255), outline=(120,200,190,255), width=6)
-    # the mascot tooth, scaled to fill the board (rounded base reads better than the molar notch here)
+    # the mascot tooth, fitted INSIDE the board with margin and centred both ways
+    # (rounded base reads better than the molar notch at this size)
     t = tight_tooth(px=320, shadow=False, notch=False)
-    avail = 88
-    sc = avail / max(t.size)
-    t = t.resize((int(t.size[0]*sc), int(t.size[1]*sc)), Image.LANCZOS)
-    by = 16   # board interior top
-    im.alpha_composite(t, (cx - t.size[0]//2, by + (88 - t.size[1])//2))
+    ix0, iy0, ix1, iy1 = cx-42, 26, cx+42, 104   # interior box, inside the outline
+    bw, bh = ix1-ix0, iy1-iy0
+    sc = min(bw/t.size[0], bh/t.size[1])
+    t = t.resize((max(1, int(t.size[0]*sc)), max(1, int(t.size[1]*sc))), Image.LANCZOS)
+    im.alpha_composite(t, (ix0 + (bw - t.size[0])//2, iy0 + (bh - t.size[1])//2))
     im.save(OUT + "/img/toothsign.png")
 
 # ---------- reception desk (station building ~118x150) ----------
