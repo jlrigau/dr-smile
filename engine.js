@@ -43,6 +43,7 @@ const LEVELS = (G.objectives && G.objectives.levels) || [];
 const ENV = G.environment || null;
 const MOOD_NEED = (CREATURE && CREATURE.moodNeed) || null;
 const MOOD_SHAPE = (CREATURE && CREATURE.moodIcon) || "heart";  // particle shape of the mood indicator
+const WANT = (CREATURE && CREATURE.wantBubble) || null;         // optional "needs care" bubble (image) replacing the mood shape
 
 // Primary playable zone where creatures roam (first zone flagged home, else first).
 const HOME_ZONE = ZONES.find((z) => z.home) || ZONES[0] || null;
@@ -182,9 +183,19 @@ function init() {
   // Close-up mini-scene: scrub/tap spots (pointer works for both mouse & touch).
   const cuStage = $("closeup-stage");
   if (cuStage) {
-    cuStage.addEventListener("pointerdown", (e) => { if (!closeupOpen || !cuState) return; e.preventDefault(); cuState.pressed = true; cuMoveBrush(e); cuRub(e); });
+    cuStage.addEventListener("pointerdown", (e) => {
+      if (!closeupOpen || !cuState) return;
+      e.preventDefault(); cuState.pressed = true; cuPid = e.pointerId;
+      // Capture on the STAGE (a stable element that's never removed) so a continuous
+      // scrub keeps working AND the pointer never ends up captured by a spot we delete
+      // mid-drag (which on iOS leaves the pointer stuck and freezes later taps).
+      try { cuStage.setPointerCapture(e.pointerId); } catch (_) {}
+      cuMoveBrush(e); cuRub(e);
+    });
     cuStage.addEventListener("pointermove", (e) => { if (!closeupOpen) return; e.preventDefault(); cuMoveBrush(e); if (cuState && cuState.pressed) cuRub(e); });
-    window.addEventListener("pointerup", () => { if (cuState) cuState.pressed = false; });
+    const cuRelease = () => { if (cuState) cuState.pressed = false; cuReleaseCapture(); };
+    window.addEventListener("pointerup", cuRelease);
+    window.addEventListener("pointercancel", cuRelease);
   }
   const cuClose = $("closeup-close");
   if (cuClose) cuClose.addEventListener("click", () => closeCloseup());
@@ -384,7 +395,7 @@ let rideFatigueAcc = 0;
 let jumpRunning = false;
 const jumpAnim = { h: 0 };
 let activeTarget = null, panelId = null, mounted = null;
-let closeupOpen = false, cuState = null;     // generic close-up mini-scene
+let closeupOpen = false, cuState = null, cuPid = null;   // generic close-up mini-scene
 let selRing = null;
 let decorObjs = [];
 let COLLISIONS = [];
@@ -733,7 +744,9 @@ function buildCreatureObj(c) {
   const body = sc.add.sprite(0, 0, creatureTexture(c)).setOrigin(orig.x, orig.y).setScale(scale);
   body.play(creatureWalkKey(c));
   applyVariantTint(body, c);
-  const heart = sc.add.image(0, heartY(c), ensureShape(MOOD_SHAPE)).setOrigin(0.5).setScale(0.95).setTint(0x6fcf5f);
+  const heart = WANT
+    ? sc.add.image(0, heartY(c) - (WANT.lift || 6), WANT.sprite).setOrigin(0.5, 1).setScale(WANT.scale || 1)
+    : sc.add.image(0, heartY(c), ensureShape(MOOD_SHAPE)).setOrigin(0.5).setScale(0.95).setTint(0x6fcf5f);
   const nameT = sc.add.text(0, 22, c.name, { fontSize: "16px", fontFamily: "sans-serif", color: "#fff8ec", fontStyle: "bold", stroke: "#3a2716", strokeThickness: 4 }).setOrigin(0.5);
   const cont = sc.add.container(c.x, c.y, [shadow, body, heart, nameT]);
   c.obj = cont; c.bodyT = body; c.heartT = heart; c.nameT = nameT; c.shadowT = shadow;
@@ -747,7 +760,7 @@ function refreshCreatureVisual(c) {
   applyVariantTint(c.bodyT, c);
   c.bodyT.setScale(scale);
   if (c.shadowT) c.shadowT.setScale(scale);
-  c.heartT.y = heartY(c);
+  c.heartT.y = heartY(c) - (WANT ? (WANT.lift || 6) : 0);
   c.nameT.setText(c.name);
 }
 
@@ -904,8 +917,16 @@ function sceneUpdate(time, delta) {
     } else {
       c.bodyT.setFlipX(playerFacing === "right");
     }
-    const m = needAverage(c);
-    c.heartT.setTint(m > 60 ? 0x6fcf5f : m > 35 ? 0xf4b942 : 0xe05656);
+    if (WANT) {
+      // a "needs care" bubble: shown while the child still wants the treatment, hidden once cured / leaving
+      const nv = WANT.need ? (c[WANT.need] || 0) : needAverage(c);
+      const wants = nv < (WANT.below != null ? WANT.below : 100) && !c.departing && !c.celebrating;
+      c.heartT.setVisible(wants);
+      if (wants) c.heartT.y = heartY(c) - (WANT.lift || 6) + Math.sin(now / 320 + c.x) * 3;  // gentle bob
+    } else {
+      const m = needAverage(c);
+      c.heartT.setTint(m > 60 ? 0x6fcf5f : m > 35 ? 0xf4b942 : 0xe05656);
+    }
   });
   if (departed.length) {
     departed.forEach(removeCreature);
@@ -1564,19 +1585,35 @@ function cuMoveBrush(e) {
   brush.style.top = (e.clientY - r.top) + "px";
 }
 
+function cuReleaseCapture() {
+  try {
+    const stage = $("closeup-stage");
+    if (stage && cuPid != null && stage.hasPointerCapture && stage.hasPointerCapture(cuPid)) stage.releasePointerCapture(cuPid);
+  } catch (_) {}
+  cuPid = null;
+}
+
+// Hit-test spots by GEOMETRY (the spots are pointer-events:none, so the pointer target
+// is always the stable stage). This makes a continuous finger-scrub clean every spot it
+// passes over, and never leaves the pointer captured by a removed element.
 function cuRub(e) {
   if (!cuState) return;
-  const t = e.target;
-  if (!t || !t.classList || !t.classList.contains("cu-spot")) return;
+  const x = e.clientX, y = e.clientY;
   const now = (typeof performance !== "undefined" ? performance.now() : Date.now());
-  if (now - (parseFloat(t.dataset.t) || 0) < 90) return;    // cooldown so a single scrub isn't instant
-  t.dataset.t = String(now);
-  const left = (parseInt(t.dataset.rubs, 10) || 1) - 1;
-  t.dataset.rubs = String(left);
-  const f = Math.max(0, left) / (parseInt(t.dataset.rubs0, 10) || 1);
-  t.style.opacity = (0.25 + 0.75 * f).toFixed(2);
-  t.style.transform = `translate(-50%,-50%) rotate(var(--rot)) scale(${(0.4 + 0.6 * f).toFixed(2)})`;
-  if (left <= 0) cuPop(t);
+  const spots = $("closeup-stage").querySelectorAll(".cu-spot");
+  for (let i = 0; i < spots.length; i++) {
+    const t = spots[i], r = t.getBoundingClientRect();
+    if (x < r.left || x > r.right || y < r.top || y > r.bottom) continue;
+    if (now - (parseFloat(t.dataset.t) || 0) < 90) return;   // cooldown so a scrub isn't instant
+    t.dataset.t = String(now);
+    const left = (parseInt(t.dataset.rubs, 10) || 1) - 1;
+    t.dataset.rubs = String(left);
+    const f = Math.max(0, left) / (parseInt(t.dataset.rubs0, 10) || 1);
+    t.style.opacity = (0.25 + 0.75 * f).toFixed(2);
+    t.style.transform = `translate(-50%,-50%) rotate(var(--rot)) scale(${(0.4 + 0.6 * f).toFixed(2)})`;
+    if (left <= 0) cuPop(t);
+    return;
+  }
 }
 
 function cuPop(spot) {
@@ -1625,6 +1662,7 @@ function clearSelection() {
 }
 
 function closeCloseup() {
+  cuReleaseCapture();
   const root = $("closeup"); if (root) { root.classList.add("hidden"); root.style.backgroundImage = ""; }
   const stage = $("closeup-stage"); if (stage) stage.querySelectorAll(".cu-spot, .cu-emoji").forEach((n) => n.remove());
   closeupOpen = false; cuState = null; clearSelection();

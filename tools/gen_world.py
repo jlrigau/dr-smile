@@ -118,33 +118,38 @@ def reception():
     d.ellipse((bx-2, by-20, bx+3, by-15), fill=(255,225,120,255), outline=OUTL)
     im.save(OUT + "/img/reception.png")
 
-# ---------- PWA icons: smiling tooth on soft pink rounded bg ----------
-def tooth_icon(size, path):
-    im = Image.new("RGBA", (size, size), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-    s = size
-    rr(d, (0, 0, s-1, s-1), int(s*0.22), fill=(255, 224, 233, 255))
-    cx, cy = s//2, int(s*0.52)
-    R = int(s*0.30)
-    # tooth body
-    d.pieslice((cx-R, cy-R-int(s*0.04), cx+R, cy+int(s*0.20)), 180, 360, fill=(255,255,255,255), outline=(120,200,190,255), width=max(2,s//90))
-    d.polygon([(cx-R, cy-int(s*0.02)),(cx-R, cy+int(s*0.28)),(cx-int(R*0.35), cy+int(s*0.14))], fill=(255,255,255,255), outline=(120,200,190,255))
-    d.polygon([(cx+R, cy-int(s*0.02)),(cx+R, cy+int(s*0.28)),(cx+int(R*0.35), cy+int(s*0.14))], fill=(255,255,255,255), outline=(120,200,190,255))
-    # face
-    er = int(s*0.035)
-    for ex in (cx-int(R*0.45), cx+int(R*0.45)):
-        d.ellipse((ex-er, cy-er-int(s*0.04), ex+er, cy+er-int(s*0.04)), fill=(60,55,70,255))
-    d.arc((cx-int(R*0.5), cy-int(s*0.04), cx+int(R*0.5), cy+int(s*0.16)), 10, 170, fill=(60,55,70,255), width=max(2,s//70))
-    # cheeks
-    for ex in (cx-int(R*0.7), cx+int(R*0.7)):
-        d.ellipse((ex-er, cy+int(s*0.02), ex+er, cy+int(s*0.06)), fill=(255,170,180,230))
-    # sparkle
-    spx, spy = cx+int(R*0.7), cy-int(R*0.7)
-    d.line([(spx, spy-int(s*0.05)),(spx, spy+int(s*0.05))], fill=(255,205,80,255), width=max(2,s//80))
-    d.line([(spx-int(s*0.05), spy),(spx+int(s*0.05), spy)], fill=(255,205,80,255), width=max(2,s//80))
-    im.save(path)
 
-floor(); chair(); plant(); tooth_sign(); reception()
-tooth_icon(512, OUT + "/favicon.png")
-tooth_icon(180, OUT + "/apple-touch-icon.png")
+# ---------- "needs care" bubble (floats above a child who still has dirty teeth) ----------
+def want_bubble():
+    # drawn at 3x then downscaled for clean edges
+    S = 3
+    W, H = 96 * S, 92 * S
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    teal = (70, 175, 165, 255)
+    # rounded speech bubble + little tail pointing down
+    body = (8 * S, 6 * S, 88 * S, 70 * S)
+    tip = (44 * S, 86 * S)
+    # tail first (white fill + teal outline on the two slanted sides), then the body covers its top
+    d.line([(38 * S, 60 * S), tip], fill=teal, width=4 * S)
+    d.line([(58 * S, 60 * S), tip], fill=teal, width=4 * S)
+    d.polygon([(38 * S, 60 * S), (58 * S, 60 * S), tip], fill=(255, 255, 255, 255))
+    rr(d, body, 26 * S, fill=(255, 255, 255, 255), outline=teal, width=4 * S)
+    # a small dirty tooth inside the bubble
+    cx, cy = 48 * S, 36 * S
+    tooth = (cx - 19 * S, cy - 22 * S, cx + 19 * S, cy + 16 * S)
+    d.ellipse((tooth[0], tooth[1], cx + 1 * S, cy - 2 * S), fill=(255, 255, 255, 255), outline=(205, 212, 220, 255), width=2 * S)
+    d.ellipse((cx - 1 * S, tooth[1], tooth[2], cy - 2 * S), fill=(255, 255, 255, 255), outline=(205, 212, 220, 255), width=2 * S)
+    rr(d, (cx - 19 * S, cy - 14 * S, cx + 19 * S, cy + 16 * S), 12 * S, fill=(255, 255, 255, 255), outline=(205, 212, 220, 255), width=2 * S)
+    d.polygon([(cx - 8 * S, cy + 16 * S), (cx, cy + 2 * S), (cx + 8 * S, cy + 16 * S)], fill=(0, 0, 0, 0))
+    # brown stains on the tooth
+    for (sx, sy, sr) in [(-7, -2, 5), (6, 4, 4), (1, -9, 3)]:
+        d.ellipse((cx + (sx - sr) * S, cy + (sy - sr) * S, cx + (sx + sr) * S, cy + (sy + sr) * S),
+                  fill=(150, 110, 70, 235))
+    im = im.resize((96, 92), Image.LANCZOS)
+    im.save(OUT + "/img/want.png")
+
+want_bubble()
+
 
 print("Dr Smile world assets generated.")

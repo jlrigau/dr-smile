@@ -26,7 +26,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v13",
+    assetVersion: "v14",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
@@ -76,6 +76,7 @@ window.GAME = {
       mouth_zoe: "assets/img/mouth_zoe.png",
       spot: "assets/img/spot.png",
       brush: "assets/img/brush.png",
+      want: "assets/img/want.png",       // "needs care" bubble floating over a child with dirty teeth
     },
     sheets: {
       drsmile: { path: "assets/sheet/drsmile.png", frameWidth: 64, frameHeight: 64 },
@@ -110,7 +111,10 @@ window.GAME = {
     scale: 1.0,
     origin: { x: 0.5, y: 0.9 },
     walk: { start: 0, end: 3, frameRate: 5 },
-    moodIcon: "heart",
+    // Above each child: a "needs care" bubble (dirty tooth) instead of an abstract mood heart.
+    // It shows while their teeth are still dirty and disappears the moment they're cured →
+    // a clear, useful "who to go help" signal for an early reader.
+    wantBubble: { sprite: "want", need: "propre", below: 100, scale: 0.6, lift: 8 },
     moodNeed: "sourire",
     moodFrom: ["propre", "sourire"],
     moodDay: { base: 0, lowPenalty: 0, lowAt: 0, highBonus: 0, highAt: 200 },
@@ -163,7 +167,7 @@ window.GAME = {
   /* ---- The care room (no fence: a cosy rug where patients gather) ---- */
   zones: [
     { id: "room", home: true, rect: { x: 360, y: 280, w: 680, h: 520 },
-      fence: false, tint: "#bfe6df", tintAlpha: 0.55, label: "Cabinet de Dr Smile" },
+      fence: false, tint: "#bfe6df", tintAlpha: 0.55, label: "Cabinet dentaire" },
   ],
 
   /* ---- Reception desk: ring the bell to bring a fresh group of children ---- */

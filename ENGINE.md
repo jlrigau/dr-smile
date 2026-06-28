@@ -92,6 +92,7 @@ actions: [ {
   anim?, stat?, message?, celebrateMessage?,
   type: "ride"|"jump"|"customize"|"closeup"?,   // special actions (omit for a normal care action)
 } ],
+wantBubble: { sprite, need?, below?, scale?, lift? },  // see below — replaces the mood shape with a "needs action" image bubble
 customize: { rename, variant },
 ride: { adultsOnly, minEnergy, fatigueNeed, sitY, nameY, onMount:{...}, *Message,
         jump:{ distance, cost, minEnergy, tooTired } },
@@ -118,6 +119,22 @@ breeding: { enabled, minMood, cooldown, message },
 names: [...], startCount, startCreatures:[{name,variant}],
 ```
 Omit `ride`/`breeding`/`aging`/`celebrate`/`customize` to disable those systems.
+
+### `creature.wantBubble` (a "needs action" indicator)
+By default each creature floats an abstract mood shape (`moodIcon`) tinted by mood. When a
+game's creatures arrive needy and **leave once satisfied** (e.g. patients), that heart is
+always red and says nothing. `wantBubble` replaces it with a themed **image bubble** that is
+shown only while the creature still wants the action, and hidden the moment it's satisfied —
+a clear "who to go help" cue.
+```
+wantBubble: {
+  sprite: "<image key>",   // the bubble image (e.g. a little dirty tooth)
+  need: "propre",          // which need drives it (omit → mood average)
+  below: 100,              // shown while need < this (default 100 → shown until fully satisfied)
+  scale: 0.6, lift: 8,     // size + extra px raised above the head
+}
+```
+It gently bobs, hides during celebration/departure, and needs no other wiring.
 
 ### `creature.depart` (leave after being cured)
 ```
