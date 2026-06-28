@@ -864,8 +864,18 @@ function sceneUpdate(time, delta) {
 
   // creature wandering + mood
   const now = time;
+  const departed = [];
   state.creatures.forEach((c) => {
     if (!c.obj) return;
+    if (c.departing) {                                    // cured → walk to the exit and fade out
+      const dx = c.exitX - c.x, dy = c.exitY - c.y, d = Math.hypot(dx, dy) || 1;
+      if (d > 6) { c.x += (dx / d) * 85 * dt; c.y += (dy / d) * 85 * dt; if (c.bodyT) c.bodyT.setFlipX(dx > 0); }
+      c.obj.x = c.x; c.obj.y = c.y; c.obj.setDepth(c.y);
+      c.departT = (c.departT || 0) + dt;
+      if (c.departT > 0.5) c.obj.alpha = Math.max(0, c.obj.alpha - dt * 0.9);
+      if (d < 10 || c.obj.alpha <= 0.03 || c.departT > 5) departed.push(c);
+      return;
+    }
     if (c !== mounted) {
       if (c.celebrating) {
         c.obj.x = c.x; c.obj.y = c.y; c.obj.setDepth(c.y);
@@ -890,8 +900,50 @@ function sceneUpdate(time, delta) {
     const m = needAverage(c);
     c.heartT.setTint(m > 60 ? 0x6fcf5f : m > 35 ? 0xf4b942 : 0xe05656);
   });
+  if (departed.length) {
+    departed.forEach(removeCreature);
+    refreshHud(); panelId = null;
+    const dp = CREATURE && CREATURE.depart;
+    if (dp && dp.emptyMessage && !state.creatures.some((c) => !c.departing)) message(dp.emptyMessage);
+  }
 
   refreshInteraction();
+}
+
+// A cured creature walks off to an exit and is removed (generic; see creature.depart).
+function departCreature(c) {
+  if (!CREATURE || !CREATURE.depart || c.departing) return;
+  const to = CREATURE.depart.to || { x: (G.player && G.player.spawn && G.player.spawn.x) || c.x, y: WORLD.h + 80 };
+  c.departing = true; c.departT = 0; c.exitX = to.x; c.exitY = to.y;
+  if (c === activeTarget) { activeTarget = null; panelId = null; }
+}
+function removeCreature(c) {
+  if (c.obj) { c.obj.destroy(); c.obj = null; }
+  const i = state.creatures.indexOf(c);
+  if (i >= 0) state.creatures.splice(i, 1);
+  save();
+}
+
+// A station with action "spawn" brings a random number of fresh creatures (up to a cap).
+function spawnPatients(st) {
+  const sp = st.spawn || {};
+  const cap = sp.cap || 8;
+  const active = state.creatures.filter((c) => !c.departing).length;
+  const room = cap - active;
+  if (room <= 0) { message(sp.fullMessage || "Full!"); return; }
+  const n = Math.min(randInt(sp.min || 1, sp.max || 3), room);
+  for (let i = 0; i < n; i++) {
+    const c = newCreature({});
+    state.creatures.push(c);
+    if (sc) {
+      buildCreatureObj(c);
+      if (c.obj) { c.obj.alpha = 0; sc.tweens.add({ targets: c.obj, alpha: 1, duration: 350 }); }
+      actionAnim(c, { motion: "hop", particle: "spark", colors: ["#ffffff", "#ffd24a", "#a8e6ff"], count: 4, y0: 30 });
+    }
+  }
+  state.actionsSinceRest = (state.actionsSinceRest || 0) + 1;
+  if (sp.message) message(sp.message.replace("{n}", n));
+  refreshHud(); save(); panelId = null; refreshInteraction();
 }
 
 function distPlayer(x, y) { return Math.hypot(player.x - x, player.y - y); }
@@ -908,7 +960,7 @@ function refreshInteraction() {
   if (mounted) best = mounted;
   else {
     STATIONS.forEach((s) => { const d = distPlayer(s.x, s.y); if (d < 110 && d < dmin) { dmin = d; best = s; } });
-    state.creatures.forEach((c) => { const d = distPlayer(c.x, c.y); if (d < 95 && d < dmin) { dmin = d; best = c; } });
+    state.creatures.forEach((c) => { if (c.departing) return; const d = distPlayer(c.x, c.y); if (d < 95 && d < dmin) { dmin = d; best = c; } });
   }
   activeTarget = best;
   const id = best ? (best.variant !== undefined && !best.station ? "c" + best.id : "s" + best.type) : null;
@@ -935,7 +987,7 @@ function onPointer(p) {
   followCreature = null;
   let target = null, dmin = Infinity;
   STATIONS.forEach((s) => { const d = Math.hypot(s.x - wx, s.y - wy); if (d < 70 && d < dmin) { dmin = d; target = s; } });
-  state.creatures.forEach((c) => { if (c === mounted) return; const d = Math.hypot(c.x - wx, c.y - wy); if (d < 55 && d < dmin) { dmin = d; target = c; } });
+  state.creatures.forEach((c) => { if (c === mounted || c.departing) return; const d = Math.hypot(c.x - wx, c.y - wy); if (d < 55 && d < dmin) { dmin = d; target = c; } });
   if (target && isCreature(target)) {
     followCreature = target; pendingInteract = null;
   } else if (target) {
@@ -1005,6 +1057,7 @@ function interact(target) {
   const st = STATIONS.find((x) => x.type === target.type);
   if (!st) return;
   if (st.action === "nextDay") nextDay();
+  else if (st.action === "spawn") spawnPatients(st);
   else if (st.action === "openShop") openShop();
   else if (st.action === "custom" && typeof st.onUse === "function") st.onUse(state, { message, refreshHud, save });
 }
@@ -1192,12 +1245,12 @@ function celebrate(c) {
     const dir = t.flipX ? -1 : 1;
     sc.tweens.add({
       targets: t, angle: dir * 42, duration: 300, ease: "Back.easeOut", yoyo: true, hold: 420,
-      onComplete: () => { if (t) { t.angle = 0; t.setOrigin(orig.x, orig.y); t.x = 0; t.y = 0; } c.celebrating = false; },
+      onComplete: () => { if (t) { t.angle = 0; t.setOrigin(orig.x, orig.y); t.x = 0; t.y = 0; } c.celebrating = false; if (CREATURE.depart) departCreature(c); },
     });
   } else {
     sc.tweens.add({
       targets: t, y: -34, duration: 230, yoyo: true, repeat: 1, ease: "Quad.easeOut",
-      onComplete: () => { if (t) t.y = 0; c.celebrating = false; },
+      onComplete: () => { if (t) t.y = 0; c.celebrating = false; if (CREATURE.depart) departCreature(c); },
     });
   }
   emitBurst(c.x, c.y, { shape: cel.particle || "heart", colors: cel.colors || ["#ff7eb6", "#7fd06f", "#ffd24a"], count: cel.count || 5, y0: 50, riseMin: 48, riseMax: 84 });

@@ -119,6 +119,15 @@ names: [...], startCount, startCreatures:[{name,variant}],
 ```
 Omit `ride`/`breeding`/`aging`/`celebrate`/`customize` to disable those systems.
 
+### `creature.depart` (leave after being cured)
+```
+depart: { to:{x,y}?, emptyMessage? }
+```
+When present, a creature that triggers `celebrate` (its mood need hits 100) finishes its
+celebration, then **walks to `to` (default: off the bottom) and is removed**. When the
+last one leaves, `emptyMessage` is shown. Pair with a `spawn` station to refill — the
+"treat → leave → ring for more" loop.
+
 ### Close-up mini-scene (`action.type:"closeup"`)
 A creature action of `type:"closeup"` opens a **full-screen scene** zoomed onto a
 backdrop image; the player **scrubs/taps "spots" off it** (works with mouse *and*
@@ -159,7 +168,9 @@ world, so the cured creature visibly rejoices when you return.
 zones: [ { id, home, rect:{x,y,w,h}, fence, gates:"both"|"left"|"right",
            gateA, gateB, tint, tintAlpha, label } ]   // home zone = where creatures roam
 stations: [ { type, x, y, sprite, label, scale?, box?, action, actionLabel,
-              onUse? } ]   // action: "nextDay" | "openShop" | "custom"
+              onUse?, spawn? } ]   // action: "nextDay" | "spawn" | "openShop" | "custom"
+// action:"spawn" → brings a random number of fresh creatures up to a cap:
+//   spawn: { min, max, cap, message?("{n}"), fullMessage? }
 ```
 
 ### `economy` / `shop` / `decor`

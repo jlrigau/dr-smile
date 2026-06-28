@@ -26,7 +26,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v11",
+    assetVersion: "v12",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
@@ -50,7 +50,7 @@ window.GAME = {
     restBlockedHint: "Occupe-toi d'abord d'un patient ! 😊",
     neglectMessage: "🌅 De nouveaux patients arrivent ! 😄",
     morningMessage: "🌅 De nouveaux sourires t'attendent ! ✨",
-    idleHint: "Va voir un patient pour t'occuper de ses dents ! 🦷",
+    idleHint: "Va voir un enfant 🦷, ou sonne la cloche 🔔 à l'accueil pour en faire venir d'autres.",
   },
 
   /* ---- World: a small cosy clinic ---- */
@@ -136,6 +136,9 @@ window.GAME = {
         celebrateMessage: "💖 Bravo ! {name} a un sourire tout neuf ! 🌟" },
     ],
     celebrate: { mode: "hop", particle: "heart", colors: ["#ff9ec4", "#ffd24a", "#a8e6ff", "#7fd06f"], count: 10 },
+    // After being cured & celebrating, the child walks out happily and leaves.
+    depart: { to: { x: 700, y: 1080 },
+              emptyMessage: "🔔 Bravo ! Sonne la cloche pour faire venir d'autres enfants !" },
 
     // The child patients: boys & girls, each its own sprite (animated per-variant).
     variants: [
@@ -148,14 +151,12 @@ window.GAME = {
     ],
 
     names: ["Léo", "Mila", "Sacha", "Lou", "Tom", "Zoé", "Nina", "Hugo", "Jade", "Sami", "Lina", "Noé"],
-    startCount: 6,
+    startCount: 4,                     // a few children to start; ring the bell for more
     startCreatures: [
       { name: "Léo", variant: "leo" },
       { name: "Mila", variant: "mila" },
       { name: "Sacha", variant: "sacha" },
       { name: "Lou", variant: "lou" },
-      { name: "Tom", variant: "tom" },
-      { name: "Zoé", variant: "zoe" },
     ],
   },
 
@@ -165,11 +166,14 @@ window.GAME = {
       fence: false, tint: "#bfe6df", tintAlpha: 0.55, label: "Cabinet de Dr Smile" },
   ],
 
-  /* ---- Reception desk: ring the bell to welcome new patients ---- */
+  /* ---- Reception desk: ring the bell to bring a fresh group of children ---- */
   stations: [
-    { type: "rest", x: 700, y: 165, sprite: "reception", scale: 1.0, label: "Accueil",
+    { type: "desk", x: 700, y: 165, sprite: "reception", scale: 1.0, label: "Accueil",
       box: { dx: -58, dy: -56, w: 116, h: 70 },
-      action: "nextDay", actionLabel: "🔔 Nouveaux patients" },
+      action: "spawn", actionLabel: "🔔 Faire venir des enfants",
+      spawn: { min: 3, max: 5, cap: 6,
+               message: "🔔 De nouveaux enfants arrivent ! 😄",
+               fullMessage: "Le cabinet est déjà plein ! 😊" } },
   ],
 
   /* ---- Cosy scenery: the big chair (centrepiece) + plants & happy-tooth signs ---- */
