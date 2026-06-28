@@ -399,6 +399,10 @@ let rideFatigueAcc = 0;
 let jumpRunning = false;
 const jumpAnim = { h: 0 };
 let activeTarget = null, panelId = null, mounted = null;
+// Sentinel meaning "panel is stale, rebuild on the next refreshInteraction" — distinct
+// from a real panel id AND from null (which is a valid id: "nothing selected"). Using
+// null to invalidate hid a bug: deselecting to null left the panel showing the old target.
+const PANEL_DIRTY = " dirty";
 let closeupOpen = false, cuState = null, cuPid = null;   // generic close-up mini-scene
 let selRing = null;
 let decorObjs = [];
@@ -698,6 +702,9 @@ function buildWorld() {
   });
 
   buildDecors();
+  // clear any transient mid-action flags from a save taken during a cure/celebration,
+  // so a reloaded creature can never get stranded (unselectable / never departs).
+  state.creatures.forEach((c) => { c.departing = false; c.celebrating = false; c.leaving = false; });
   state.creatures.forEach(buildCreatureObj);
 
   // Player
@@ -959,7 +966,7 @@ function sceneUpdate(time, delta) {
   });
   if (departed.length) {
     departed.forEach(removeCreature);
-    refreshHud(); panelId = null;
+    refreshHud(); panelId = PANEL_DIRTY;
     const dp = CREATURE && CREATURE.depart;
     if (dp && dp.emptyMessage && !state.creatures.some((c) => !c.departing)) message(dp.emptyMessage);
   }
@@ -979,7 +986,7 @@ function departCreature(c) {
   if (!CREATURE || !CREATURE.depart || c.departing) return;
   const to = CREATURE.depart.to || { x: (G.player && G.player.spawn && G.player.spawn.x) || c.x, y: WORLD.h + 80 };
   c.departing = true; c.departT = 0; c.exitX = to.x; c.exitY = to.y;
-  if (c === activeTarget) { activeTarget = null; panelId = null; }
+  if (c === activeTarget) { activeTarget = null; panelId = PANEL_DIRTY; }
 }
 function removeCreature(c) {
   if (c.obj) { c.obj.destroy(); c.obj = null; }
@@ -1007,7 +1014,7 @@ function spawnCreatures(st) {
   }
   state.actionsSinceRest = (state.actionsSinceRest || 0) + 1;
   if (sp.message) message(sp.message.replace("{n}", n));
-  refreshHud(); save(); panelId = null; refreshInteraction();
+  refreshHud(); save(); panelId = PANEL_DIRTY; refreshInteraction();
 }
 
 function distPlayer(x, y) { return Math.hypot(player.x - x, player.y - y); }
@@ -1024,7 +1031,7 @@ function refreshInteraction() {
   if (mounted) best = mounted;
   else {
     STATIONS.forEach((s) => { const d = distPlayer(s.x, s.y); if (d < 110 && d < dmin) { dmin = d; best = s; } });
-    state.creatures.forEach((c) => { if (c.departing) return; const d = distPlayer(c.x, c.y); if (d < 95 && d < dmin) { dmin = d; best = c; } });
+    state.creatures.forEach((c) => { if (c.departing || c.celebrating || c.leaving) return; const d = distPlayer(c.x, c.y); if (d < 95 && d < dmin) { dmin = d; best = c; } });
   }
   activeTarget = best;
   const id = best ? (best.variant !== undefined && !best.station ? "c" + best.id : "s" + best.type) : null;
@@ -1051,7 +1058,7 @@ function onPointer(p) {
   followCreature = null;
   let target = null, dmin = Infinity;
   STATIONS.forEach((s) => { const d = Math.hypot(s.x - wx, s.y - wy); if (d < 70 && d < dmin) { dmin = d; target = s; } });
-  state.creatures.forEach((c) => { if (c === mounted || c.departing) return; const d = Math.hypot(c.x - wx, c.y - wy); if (d < 55 && d < dmin) { dmin = d; target = c; } });
+  state.creatures.forEach((c) => { if (c === mounted || c.departing || c.celebrating || c.leaving) return; const d = Math.hypot(c.x - wx, c.y - wy); if (d < 55 && d < dmin) { dmin = d; target = c; } });
   if (target && isCreature(target)) {
     followCreature = target; pendingInteract = null;
   } else if (target) {
@@ -1175,7 +1182,7 @@ function toggleRide(c) {
   if (statKeys().includes("ride")) state.stats.ride = (state.stats.ride || 0) + 1;
   rideFatigueAcc = 0;
   message((RIDE.mountMessage || "Riding {name}!").replace("{name}", c.name));
-  panelId = null; refreshInteraction(); refreshHud();
+  panelId = PANEL_DIRTY; refreshInteraction(); refreshHud();
 }
 
 function doJump() {
@@ -1204,7 +1211,7 @@ function dismount(c, exhausted) {
   c.y = clamp(player.y, 40, WORLD.h - 40);
   c.tx = c.x; c.ty = c.y; c.nextStep = 0;
   if (c.obj) { c.obj.x = c.x; c.obj.y = c.y; }
-  panelId = null; refreshInteraction(); refreshHud();
+  panelId = PANEL_DIRTY; refreshInteraction(); refreshHud();
   const RIDE = CREATURE.ride || {};
   message(exhausted ? (RIDE.exhaustedMessage || "{name} is exhausted!").replace("{name}", c.name) : (RIDE.dismountMessage || "You get off {name}.").replace("{name}", c.name));
 }
@@ -1462,7 +1469,7 @@ function buyDecor(id) {
     if (ghostDecor) ghostDecor.destroy();
     ghostDecor = sc.add.image(player.x, player.y, d.sprite).setOrigin(0.5, 0.95).setScale(d.scale || 1.2).setAlpha(0.6).setDepth(99999);
   }
-  refreshHud(); panelId = null; refreshInteraction();
+  refreshHud(); panelId = PANEL_DIRTY; refreshInteraction();
   message((META.boughtDecorMessage || "{name} bought! Walk around and tap “Place here”.").replace("{name}", d.name));
 }
 
@@ -1535,7 +1542,7 @@ function openCustomize(c) {
       if (name && nameUsed(name, c)) { message((META.nameTaken || "Another one is already called {name}!").replace("{name}", name)); return; }
       if (name) c.name = name;
     }
-    refreshCreatureVisual(c); save(); closeModal(); panelId = null;
+    refreshCreatureVisual(c); save(); closeModal(); panelId = PANEL_DIRTY;
     message((CREATURE.customizedMessage || "{name} updated! 🎨").replace("{name}", c.name));
   });
   drawPreview();
@@ -1697,9 +1704,10 @@ function cuApply(c, a) {
   let celebrated = false;
   if (MOOD_NEED && CREATURE.celebrate && (!CREATURE.celebrate.adultsOnly || !isYoung(c)) && moodBefore < 100 && (c[MOOD_NEED] || 0) >= 100) {
     if (sc) sc.time.delayedCall(250, () => celebrate(c)); celebrated = true;
+    if (CREATURE.depart) c.leaving = true;   // cured & about to leave → stop selecting it (panel clears now, not 250ms later)
   }
   if (a.message) message((celebrated && a.celebrateMessage ? a.celebrateMessage : a.message).replace("{name}", c.name));
-  refreshBars(c); refreshHud(); panelId = null; refreshInteraction();
+  refreshBars(c); refreshHud(); panelId = PANEL_DIRTY; refreshInteraction();
 }
 
 function clearSelection() {
