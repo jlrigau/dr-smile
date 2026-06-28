@@ -67,6 +67,15 @@ Use a fresh `meta.saveKey` so it doesn't collide with other games' saves.
   **add-creature-variant**.
 - Generate fresh **PWA icons** (`assets/favicon.png` 512, `assets/apple-touch-icon.png`
   180) matching the new theme.
+- **Remove the leftover demo assets** the new game no longer uses (the seed shipped with
+  the previous game's art). Dry-run first, review, then delete:
+  ```bash
+  node .claude/skills/_shared/prune-assets.cjs            # list unreferenced files
+  node .claude/skills/_shared/prune-assets.cjs --delete   # remove them
+  ```
+  It keeps any file referenced by path **or key** (and `CREDITS.md`), so it won't touch
+  assets the new config still uses. Also prune now-dead `assets` entries / `tools/` art
+  generators from the old game, and update `assets/CREDITS.md`.
 
 ## Step 4 — Theme & shell
 - Restyle `style.css` palette (CSS variables at the top) and update titles/ids in

@@ -10,6 +10,7 @@ run by Claude Code through the **Bash** tool.
 | `bump-version.mjs` | Bump the cache version `vN` in **both places** (`assetVersion` in game.config.js + every `?v=` in index.html). `node .claude/skills/_shared/bump-version.mjs`. |
 | `playtest.cjs` | Headless Playwright harness: starts a game, takes zone screenshots (`--shots`), checks trail-loop walkability (`--walk`), evaluates expressions (`--eval`), runs assertions (`--probe`), picks the browser engine (`--engine`) and emulates a device (`--device`), and **reports page errors**. |
 | `separation-audit.cjs` | Prove the engine/game boundary: engine.js has no game text, game.config.js no engine logic, the shell body stays neutral. `node .claude/skills/_shared/separation-audit.cjs` (exit ≠ 0 on a likely leak). Used by **capitalize-learnings**. |
+| `prune-assets.cjs` | List (or `--delete`) files under `assets/` that no game/shell file references — e.g. leftover demo art after **new-game** replaces the demo. Dry-run by default; keeps files referenced by path **or** key. |
 
 ## Requirements
 - `python3` (static server), `node` + **Playwright** (Chromium); for asset skills:
