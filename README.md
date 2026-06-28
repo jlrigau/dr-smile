@@ -1,10 +1,10 @@
 # 🦷 Dr Smile
 
-**Brosse les dents et rends tout le monde heureux !** A gentle dentist game for a 6–7
-year old who is starting to read (French): you play *Dr Smile*, children arrive with
-dirty teeth, the view **zooms onto the open mouth** and you scrub the spots off with a
-finger until the smile shines — then the child leaves happy. No stress, no failure,
-almost no text. For **young kids (6–7)**.
+A gentle dentist game (the game itself is in **French**) for a 6–7 year old who is
+starting to read. You play *Dr Smile*: children arrive with dirty teeth, the view
+**zooms onto the open mouth**, and you scrub the spots off with a finger until the smile
+shines — then the child leaves happy. No stress, no failure, almost no text. For **young
+kids (6–7)**.
 
 ▶ **[Play Dr Smile](https://jlrigau.github.io/dr-smile/)**
 

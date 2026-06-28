@@ -95,6 +95,10 @@ with the game you just created, and **keep all the technical/template content be
 Keep it short and faithful to `meta` — don't invent features the game doesn't have. (The
 **capitalize-learnings** skill keeps this in sync when the game later changes substantially.)
 
+**Write the README in English** (the repo's documentation language) **even if the game's
+UI is in another language** — don't mix languages. Mention the game's language in passing
+(e.g. "the game itself is in French") rather than dropping foreign copy into the prose.
+
 ## Step 6 — Verify & ship
 - **test-debug**: `node --check`, serve, run the harness — 0 page errors, core actions
   work, state correct. Look at the screenshots.
