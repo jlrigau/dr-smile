@@ -1630,7 +1630,16 @@ function cuReleaseCapture() {
 // passes over, and never leaves the pointer captured by a removed element.
 function cuRub(e) {
   if (!cuState) return;
-  const x = e.clientX, y = e.clientY;
+  // Scrub from the BRUSH HEAD (bristles), not the raw finger position: map a point of the
+  // brush sprite (closeup.brushTip, fractions of the sprite — default its centre) to screen px.
+  let x = e.clientX, y = e.clientY;
+  const brush = $("closeup-brush");
+  const tip = cuState.a && cuState.a.closeup && cuState.a.closeup.brushTip;
+  if (tip && brush && !brush.classList.contains("hidden")) {
+    const br = brush.getBoundingClientRect();
+    x = br.left + (tip.x != null ? tip.x : 0.5) * br.width;
+    y = br.top + (tip.y != null ? tip.y : 0.5) * br.height;
+  }
   const now = (typeof performance !== "undefined" ? performance.now() : Date.now());
   const spots = $("closeup-stage").querySelectorAll(".cu-spot");
   for (let i = 0; i < spots.length; i++) {

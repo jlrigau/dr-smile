@@ -166,6 +166,9 @@ action = {
                                   //   creature via `variant.closeupBg` (e.g. each child's own face)
     spotSprite: "<image key>"?,   // sprite for a spot (omit → a plain CSS blob)
     brush: "<image key>"?,        // cursor sprite that follows the finger (optional)
+    brushTip: { x, y }?,          // active scrub point as fractions of the brush sprite (e.g. its
+                                  //   bristle head) — spots are removed from HERE, not the raw finger.
+                                  //   Omit → the finger position itself is the active point.
     spots: {
       base: 4,                    // spots on the first cure
       growEvery: 2, max: 12,      // +1 spot every N completions of this action (ramps up), capped
