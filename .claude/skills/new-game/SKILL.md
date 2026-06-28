@@ -30,9 +30,16 @@ Ask only what changes the output. Bundle into 1–2 `AskUserQuestion` calls:
 - **Core loop**: the main entity to care for / interact with, and the 3–5 main
   **actions** (feed/clean/play/ride… or theme equivalents). Keep it close to the
   engine's supported systems (see `ENGINE.md` for the full list of capabilities).
+  - A common kid-friendly loop is the **zoom / close-up** (`action.type:"closeup"`): the
+    view zooms onto a backdrop and the player **scrubs spots off it** with a finger/brush
+    (clean a mouth, wash a pet, polish a gem…). Pairs well with **`creature.depart`** (the
+    cured one walks off) + a **`station.action:"spawn"`** (ring to bring more) and a
+    **`creature.wantBubble`** (who needs help) — the "treat → leave → ring for more" loop.
+    Almost text-free, so it's ideal for early readers. See ENGINE.md.
 - **Optional systems**: variants, customization, riding+obstacles, breeding, aging,
-  shop, decorations, objectives/levels, trail loop. **Default = OFF.** Only enable one
-  if the user explicitly wants it in the first version.
+  shop, decorations, objectives/levels, trail loop, close-up scrub, depart+spawn,
+  want-bubble. **Default = OFF.** Only enable one if the user explicitly wants it in the
+  first version.
 
 If an answer is obvious from the theme, pick a sensible default and say so — don't
 over-ask. Bias toward the smallest playable game.

@@ -71,3 +71,9 @@ ios-pwa-check, release-deploy. Shared tooling in `_shared/`.
 - Demo textures are **generated** and specific to the game's universe (no reuse from a
   different game's art). `meta.showCoins:false` hides the economy; the goals button
   auto-hides when there are no objective levels.
+- When a **mascot** appears in several places (app icon + in-scene signs…), generate it
+  from **one shared art module** (e.g. `tools/tooth.py` → used by `gen_icon.py` and
+  `gen_world.py`) so the versions never drift apart.
+- **iOS / touch:** drag-over-touch interactions (close-up scrub…) must follow the
+  robustness pattern in `ENGINE.md` and be verified on the **real Safari engine**
+  (`playtest.cjs --engine webkit --device "iPhone 13"`) — Chromium-green is not enough.

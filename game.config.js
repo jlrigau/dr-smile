@@ -26,7 +26,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v20",
+    assetVersion: "v21",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
@@ -44,6 +44,7 @@ window.GAME = {
     continueLabel: "📂 Continuer",
     continueHint: "Appuie sur « Continuer » pour reprendre. 🦷",
     helpTitle: "❓ Comment jouer",
+    closeLabel: "Fermer",              // aria-label of the close-up's ✖ button (a11y)
     ageUnit: "", and: "et",
 
     nightMessage: "✨",

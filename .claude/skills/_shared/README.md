@@ -8,15 +8,33 @@ run by Claude Code through the **Bash** tool.
 | --- | --- |
 | `serve.sh` | Serve the game statically: `bash .claude/skills/_shared/serve.sh [port]` (def. 8099). |
 | `bump-version.mjs` | Bump the cache version `vN` in **both places** (`assetVersion` in game.config.js + every `?v=` in index.html). `node .claude/skills/_shared/bump-version.mjs`. |
-| `playtest.cjs` | Headless Playwright harness: starts a game, takes zone screenshots (`--shots`), checks trail-loop walkability (`--walk`), evaluates expressions (`--eval`), runs assertions (`--probe`), and **reports page errors**. |
+| `playtest.cjs` | Headless Playwright harness: starts a game, takes zone screenshots (`--shots`), checks trail-loop walkability (`--walk`), evaluates expressions (`--eval`), runs assertions (`--probe`), picks the browser engine (`--engine`) and emulates a device (`--device`), and **reports page errors**. |
 
 ## Requirements
 - `python3` (static server), `node` + **Playwright** (Chromium); for asset skills:
   `Pillow`/`numpy` (image slicing/generation).
 - Playwright is found via `require("playwright")` then `/opt/node22/lib/node_modules/playwright`.
 - The harness loads the game over a static server; if outbound HTTPS goes through a
-  proxy it points Chromium at `HTTPS_PROXY` automatically. Phaser is **vendored
-  locally** (`vendor/phaser.min.js`), so tests don't depend on a CDN.
+  proxy it points the browser at `HTTPS_PROXY` automatically (Chromium via a CLI flag,
+  WebKit/Firefox via `launch.proxy`). Phaser is **vendored locally**
+  (`vendor/phaser.min.js`), so tests don't depend on a CDN.
+
+## Testing on the real Safari engine (WebKit) — for iOS bugs
+Some touch/pointer bugs **do not reproduce in headless Chromium** (e.g. the implicit
+pointer-capture *freeze* and the blue text-selection in the close-up — see ENGINE.md
+"iOS / touch robustness"). Drive the actual Safari engine instead:
+```bash
+node .claude/skills/_shared/playtest.cjs --engine webkit --device "iPhone 13" \
+  --probe ./touch-scenario.cjs
+```
+- `--engine chromium|webkit|firefox` (def. chromium); `--device "iPhone 13"` adds the
+  touch/UA/viewport profile (any Playwright device name works).
+- **One-time install** of the WebKit binary (it is not bundled):
+  `npx playwright install webkit` then `npx playwright install-deps webkit`
+  (or, with the vendored CLI: `node /opt/node22/lib/node_modules/playwright/cli.js install webkit`).
+  The harness prints this hint and exits 3 if WebKit is missing.
+- In a probe, drive touch with **real pointer events** (`page.mouse` / dispatched
+  `pointerdown`/`pointermove`/`pointerup`), not `page.fill`, to actually exercise the bug.
 
 ## Engine globals exposed to `page.evaluate`
 `GAME` (the config), `state`, `player`, `COLLISIONS`, `WORLD`, `PATHS`, `LOOP_SEG`,

@@ -198,7 +198,10 @@ function init() {
     window.addEventListener("pointercancel", cuRelease);
   }
   const cuClose = $("closeup-close");
-  if (cuClose) cuClose.addEventListener("click", () => closeCloseup());
+  if (cuClose) {
+    if (G.meta && G.meta.closeLabel) cuClose.setAttribute("aria-label", G.meta.closeLabel);  // localise the generic shell
+    cuClose.addEventListener("click", () => closeCloseup());
+  }
   window.addEventListener("resize", () => { if (closeupOpen) cuPlaceSpots(); });
   // Never start a text selection / iOS callout from a tap-drag in the game world —
   // a stray selection hijacks subsequent touches (e.g. the player stops responding).
@@ -985,7 +988,7 @@ function removeCreature(c) {
 }
 
 // A station with action "spawn" brings a random number of fresh creatures (up to a cap).
-function spawnPatients(st) {
+function spawnCreatures(st) {
   const sp = st.spawn || {};
   const cap = sp.cap || 8;
   const active = state.creatures.filter((c) => !c.departing).length;
@@ -1117,7 +1120,7 @@ function interact(target) {
   const st = STATIONS.find((x) => x.type === target.type);
   if (!st) return;
   if (st.action === "nextDay") nextDay();
-  else if (st.action === "spawn") spawnPatients(st);
+  else if (st.action === "spawn") spawnCreatures(st);
   else if (st.action === "openShop") openShop();
   else if (st.action === "custom" && typeof st.onUse === "function") st.onUse(state, { message, refreshHud, save });
 }

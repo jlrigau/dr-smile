@@ -52,7 +52,7 @@ coinIcon, namePrompt:{label,placeholder}, startName, namePromptYou, avatarPrompt
 createTitle, createOkLabel, startLabel, continueLabel, continueHint, helpTitle,
 ageUnit, and, nightMessage, restBlockedHint, neglectMessage, morningMessage,
 notEnough, idleHint, placeHint, placeHere, cancel, boughtDecorMessage, placedMessage,
-refundMessage, noOnBuilding, noInHome, nameLabel, confirm, nameTaken
+refundMessage, noOnBuilding, noInHome, nameLabel, confirm, nameTaken, closeLabel
 ```
 Strings with `{name}`, `{day}`, `{names}`, `{item}` are interpolated by the engine.
 
@@ -189,6 +189,23 @@ Requires the `#closeup` overlay element in `index.html` and the `.closeup*` styl
 `style.css` (both generic). Difficulty ramps via `state.stats[stat]` (number of past
 completions). The mood need reaching 100 via `effects` triggers `celebrate` in the
 world, so the cured creature visibly rejoices when you return.
+`meta.closeLabel` localises the ✖ button's `aria-label` (default `"Close"`).
+
+#### iOS / touch robustness (why the close-up is built the way it is)
+A finger-scrub over disappearing targets hits two real Safari/iOS bugs. The engine and
+the generic `.closeup*` styles already guard against both — **keep these if you change
+the close-up**, and reuse the pattern for any new drag-over-touch interaction:
+- **Pointer-capture freeze.** When a spot under the finger is removed mid-drag, iOS keeps
+  the pointer *implicitly captured* by the now-gone element, and every later touch is
+  swallowed (the player "can't move" after a cure). Fix: spots are `pointer-events:none`
+  and hit-tested **by geometry** (`cuRub`), the pointer is captured on the **stable stage**
+  (`setPointerCapture` on `#closeup-stage`) and **released** on close / `pointerup` /
+  `pointercancel` (`cuReleaseCapture`). Never capture on an element you may delete.
+- **Blue text-selection.** A tap-drag starts a selection that hijacks subsequent touches.
+  Fix: `user-select:none` + `-webkit-touch-callout:none` + `-webkit-user-drag:none` on the
+  overlay, `touch-action:none`, and a global `selectstart` `preventDefault` (skipping
+  inputs/textareas). These bugs **do not reproduce in headless Chromium** — see the
+  `--engine webkit` mode of `playtest.cjs` and the **test-debug** / **ios-pwa-check** skills.
 
 ### `zones` / `stations`
 ```
