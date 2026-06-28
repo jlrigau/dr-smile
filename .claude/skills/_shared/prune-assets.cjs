@@ -40,4 +40,5 @@ const unused = files.filter((p) => !KEEP.has(path.basename(p)) && !referenced(p)
 if (!unused.length) { console.log("No unreferenced assets ✓"); process.exit(0); }
 console.log(`${unused.length} unreferenced asset(s)${del ? " — deleting:" : " (dry run; pass --delete to remove):"}`);
 for (const p of unused) { console.log("  " + rel(p)); if (del) fs.unlinkSync(p); }
+if (!del) console.log("\nReview before deleting: KEEP generic reusable building blocks (ground, trees,\nbushes, fences, generic buildings) you may want when iterating — prune only the\nprevious game's theme-specific art.");
 process.exit(0);

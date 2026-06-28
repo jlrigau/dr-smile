@@ -67,15 +67,22 @@ Use a fresh `meta.saveKey` so it doesn't collide with other games' saves.
   **add-creature-variant**.
 - Generate fresh **PWA icons** (`assets/favicon.png` 512, `assets/apple-touch-icon.png`
   180) matching the new theme.
-- **Remove the leftover demo assets** the new game no longer uses (the seed shipped with
-  the previous game's art). Dry-run first, review, then delete:
+- **Remove the previous game's leftover themed art** the new game no longer uses. Always
+  **dry-run first and review** — never blanket-`--delete`:
   ```bash
   node .claude/skills/_shared/prune-assets.cjs            # list unreferenced files
-  node .claude/skills/_shared/prune-assets.cjs --delete   # remove them
+  node .claude/skills/_shared/prune-assets.cjs --delete   # remove them (after review)
   ```
-  It keeps any file referenced by path **or key** (and `CREDITS.md`), so it won't touch
-  assets the new config still uses. Also prune now-dead `assets` entries / `tools/` art
-  generators from the old game, and update `assets/CREDITS.md`.
+  It keeps any file referenced by path **or key** (and `CREDITS.md`). From the list,
+  delete only the **old game's theme-specific art**. **KEEP the generic, reusable
+  building blocks** even if unused now — ground tiles, trees, bushes, fences, generic
+  buildings: you'll likely want them when you later add an arena/forest/trail (see
+  `environment`). They're cheap to keep and costly to regenerate.
+  Then prune the matching now-dead `assets` entries / old `tools/` art generators and
+  update `assets/CREDITS.md`.
+- Note: pruning runs **after** the new game is authored, and only touches asset *files* —
+  the lasting references for building/iterating are **`ENGINE.md`** (full schema) + the
+  per-feature skills + your own new `game.config.js`, none of which are removed.
 
 ## Step 4 — Theme & shell
 - Restyle `style.css` palette (CSS variables at the top) and update titles/ids in
