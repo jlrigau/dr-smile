@@ -26,7 +26,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v16",
+    assetVersion: "v17",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
@@ -112,9 +112,10 @@ window.GAME = {
     origin: { x: 0.5, y: 0.9 },
     walk: { start: 0, end: 3, frameRate: 5 },
     // Above each child: a "needs care" bubble (dirty tooth) instead of an abstract mood heart.
-    // It shows while their teeth are still dirty and disappears the moment they're cured →
-    // a clear, useful "who to go help" signal for an early reader.
-    wantBubble: { sprite: "want", need: "propre", below: 100, scale: 0.6, lift: 8 },
+    // It pops up now and then (intermittent, desynced per child) while their teeth are dirty —
+    // like the kids occasionally piping up "viens t'occuper de moi" — and stops once cured.
+    wantBubble: { sprite: "want", need: "propre", below: 100, scale: 0.6, lift: 8,
+                  intermittent: true, showFor: 2.5, hideMin: 5, hideMax: 12 },
     moodNeed: "sourire",
     moodFrom: ["propre", "sourire"],
     moodDay: { base: 0, lowPenalty: 0, lowAt: 0, highBonus: 0, highAt: 200 },

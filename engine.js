@@ -745,7 +745,7 @@ function buildCreatureObj(c) {
   body.play(creatureWalkKey(c));
   applyVariantTint(body, c);
   const heart = WANT
-    ? sc.add.image(0, heartY(c) - (WANT.lift || 6), WANT.sprite).setOrigin(0.5, 1).setScale(WANT.scale || 1)
+    ? sc.add.image(0, heartY(c) - (WANT.lift || 6), WANT.sprite).setOrigin(0.5, 1).setScale(WANT.scale || 1).setVisible(!WANT.intermittent)
     : sc.add.image(0, heartY(c), ensureShape(MOOD_SHAPE)).setOrigin(0.5).setScale(0.95).setTint(0x6fcf5f);
   const nameT = sc.add.text(0, 22, c.name, { fontSize: "16px", fontFamily: "sans-serif", color: "#fff8ec", fontStyle: "bold", stroke: "#3a2716", strokeThickness: 4 }).setOrigin(0.5);
   const cont = sc.add.container(c.x, c.y, [shadow, body, heart, nameT]);
@@ -925,8 +925,29 @@ function sceneUpdate(time, delta) {
       // a "needs care" bubble: shown while the child still wants the treatment, hidden once cured / leaving
       const nv = WANT.need ? (c[WANT.need] || 0) : needAverage(c);
       const wants = nv < (WANT.below != null ? WANT.below : 100) && !c.departing && !c.celebrating;
-      c.heartT.setVisible(wants);
-      if (wants) c.heartT.y = heartY(c) - (WANT.lift || 6) + Math.sin(now / 320 + c.x) * 3;  // gentle bob
+      const lift = WANT.lift || 6, base = WANT.scale || 1;
+      if (!wants) {
+        c.heartT.setVisible(false); c.wantUntil = null;       // cured/leaving → no bubble
+      } else if (WANT.intermittent) {
+        // pop up for a moment, then hide for a random gap (desynced per child) — they "pipe up" now and then
+        if (c.wantUntil == null) {                            // first eligibility: stay quiet a random while
+          c.wantPhase = "hide"; c.wantUntil = now + randInt(300, (WANT.hideMax || 9) * 1000);
+        }
+        if (now >= c.wantUntil) {
+          if (c.wantPhase === "show") { c.wantPhase = "hide"; c.wantUntil = now + randInt((WANT.hideMin || 5) * 1000, (WANT.hideMax || 11) * 1000); }
+          else { c.wantPhase = "show"; c.wantShownAt = now; c.wantUntil = now + (WANT.showFor || 2.5) * 1000; }
+        }
+        const showing = c.wantPhase === "show";
+        c.heartT.setVisible(showing);
+        if (showing) {
+          const e = Math.min(1, (now - c.wantShownAt) / 180); // quick pop-in
+          c.heartT.setScale(base * (0.55 + 0.45 * e * (2 - e)));
+          c.heartT.y = heartY(c) - lift + Math.sin(now / 300 + c.x) * 3;
+        }
+      } else {
+        c.heartT.setVisible(true);
+        c.heartT.y = heartY(c) - lift + Math.sin(now / 320 + c.x) * 3;  // gentle bob
+      }
     } else {
       const m = needAverage(c);
       c.heartT.setTint(m > 60 ? 0x6fcf5f : m > 35 ? 0xf4b942 : 0xe05656);

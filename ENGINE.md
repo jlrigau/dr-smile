@@ -130,11 +130,16 @@ a clear "who to go help" cue.
 wantBubble: {
   sprite: "<image key>",   // the bubble image (e.g. a little dirty tooth)
   need: "propre",          // which need drives it (omit → mood average)
-  below: 100,              // shown while need < this (default 100 → shown until fully satisfied)
+  below: 100,              // eligible while need < this (default 100 → until fully satisfied)
   scale: 0.6, lift: 8,     // size + extra px raised above the head
+  intermittent: true,      // pop up now and then instead of showing permanently
+  showFor: 2.5,            // seconds visible per appearance (intermittent only)
+  hideMin: 5, hideMax: 12, // random gap (s) between appearances — desynced per creature
 }
 ```
-It gently bobs, hides during celebration/departure, and needs no other wiring.
+It gently bobs (and pops in when `intermittent`), hides during celebration/departure, and
+needs no other wiring. With `intermittent`, each creature shows its bubble on its own random
+cadence, so they don't all appear at once.
 
 ### `creature.depart` (leave after being cured)
 ```
