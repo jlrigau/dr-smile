@@ -55,9 +55,10 @@ def draw_drsmile(direction, phase, coat, trim, hair, skin, long_hair=False, lash
     d.line([(cx, by0+2), (cx, by1)], fill=(225, 232, 240, 255), width=1)
     # collar / trim (variant colour) — a clear scrub V-neck
     d.polygon([(cx-7, by0+2), (cx, by0+9), (cx+7, by0+2), (cx, by0+5)], fill=trim)
-    # white-coat chest pocket with a tiny tooth badge (dentist cue), front/side only
+    # white-coat chest pocket with a tiny tooth badge (dentist cue), front/side only.
+    # Always on the SAME side of the coat (never flips when the character turns).
     if direction != "up":
-        px0 = cx + 3 if direction != "left" else cx - 9
+        px0 = cx + 3
         d.rectangle((px0, by1-9, px0+6, by1-3), fill=(232, 238, 245, 255), outline=trim_dark(coat))
         d.ellipse((px0+2, by1-7, px0+4, by1-5), fill=trim)   # little tooth/badge dot
 
