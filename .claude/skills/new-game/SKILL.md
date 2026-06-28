@@ -119,6 +119,10 @@ UI is in another language** — don't mix languages. Mention the game's language
 - **test-debug**: `node --check`, serve, run the harness — 0 page errors, core actions
   work, state correct. Look at the screenshots.
 - **map-verify** if the map geometry is custom (walkability empty).
+- **Tag the repo for discovery**: add a GitHub **topic** `built-with-<template>` to the
+  new game's repo (via the GitHub API / `gh repo edit --add-topic`). There's no API to
+  list repos generated from a template, so this topic is how the template later finds its
+  games to harvest learnings (see **sync-engine**).
 - **release-deploy** when the user wants it live (or hand back for review first).
 
 ## Guard-rails
