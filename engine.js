@@ -183,12 +183,19 @@ function init() {
   const cuStage = $("closeup-stage");
   if (cuStage) {
     cuStage.addEventListener("pointerdown", (e) => { if (!closeupOpen || !cuState) return; e.preventDefault(); cuState.pressed = true; cuMoveBrush(e); cuRub(e); });
-    cuStage.addEventListener("pointermove", (e) => { if (!closeupOpen) return; cuMoveBrush(e); if (cuState && cuState.pressed) cuRub(e); });
+    cuStage.addEventListener("pointermove", (e) => { if (!closeupOpen) return; e.preventDefault(); cuMoveBrush(e); if (cuState && cuState.pressed) cuRub(e); });
     window.addEventListener("pointerup", () => { if (cuState) cuState.pressed = false; });
   }
   const cuClose = $("closeup-close");
   if (cuClose) cuClose.addEventListener("click", () => closeCloseup());
   window.addEventListener("resize", () => { if (closeupOpen) cuPlaceSpots(); });
+  // Never start a text selection / iOS callout from a tap-drag in the game world —
+  // a stray selection hijacks subsequent touches (e.g. the player stops responding).
+  document.addEventListener("selectstart", (e) => {
+    const t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+    e.preventDefault();
+  });
 }
 
 // Inject configured labels/titles into the static HTML shell.
@@ -1504,7 +1511,7 @@ function openCloseup(c, a) {
   for (let i = 0; i < count; i++) {
     const ar = areas[i % areas.length];
     const s = document.createElement(cfg.spotSprite ? "img" : "div");
-    s.className = "cu-spot";
+    s.className = "cu-spot"; s.draggable = false;
     if (cfg.spotSprite) s.src = imgPath(cfg.spotSprite, "spot");
     // store the spot's position/size as fractions of the BACKDROP IMAGE; it's mapped
     // to screen pixels in cuPlaceSpots() so it stays on the teeth under object-fit:cover.
@@ -1523,6 +1530,7 @@ function openCloseup(c, a) {
   }
   cuState = { c, a, remaining: count, pressed: false };
   closeupOpen = true;
+  clearSelection();
   root.classList.remove("hidden");
   themeColor((META.theme && META.theme.play) || TINT_PLAY);
   cuPlaceSpots();
@@ -1612,10 +1620,14 @@ function cuApply(c, a) {
   refreshBars(c); refreshHud(); panelId = null; refreshInteraction();
 }
 
+function clearSelection() {
+  try { const s = window.getSelection && window.getSelection(); if (s && s.removeAllRanges) s.removeAllRanges(); } catch (e) {}
+}
+
 function closeCloseup() {
   const root = $("closeup"); if (root) { root.classList.add("hidden"); root.style.backgroundImage = ""; }
   const stage = $("closeup-stage"); if (stage) stage.querySelectorAll(".cu-spot, .cu-emoji").forEach((n) => n.remove());
-  closeupOpen = false; cuState = null;
+  closeupOpen = false; cuState = null; clearSelection();
   // Make sure the world is fully interactive again (belt-and-braces: clear any
   // transient input/movement state and re-assert camera follow + keyboard).
   moveTarget = null; pendingInteract = null; followCreature = null;
