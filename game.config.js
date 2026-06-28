@@ -26,7 +26,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v14",
+    assetVersion: "v15",
     theme: { home: "#ffe0e9", play: "#eaf6f2" },
 
     showCoins: true,
@@ -47,8 +47,8 @@ window.GAME = {
     ageUnit: "", and: "et",
 
     nightMessage: "✨",
-    restBlockedHint: "Occupe-toi d'abord d'un patient ! 😊",
-    neglectMessage: "🌅 De nouveaux patients arrivent ! 😄",
+    restBlockedHint: "Occupe-toi d'abord d'un enfant ! 😊",
+    neglectMessage: "🌅 De nouveaux enfants arrivent ! 😄",
     morningMessage: "🌅 De nouveaux sourires t'attendent ! ✨",
     idleHint: "Va voir un enfant 🦷, ou sonne la cloche 🔔 à l'accueil pour en faire venir d'autres.",
   },
@@ -106,7 +106,7 @@ window.GAME = {
      "propre" + "sourire" drive the mood heart (grumpy red → radiant green) and
      are filled to 100 when the mouth is fully cleaned. No bars, no reading. */
   creature: {
-    label: "patients", icon: "🦷",
+    label: "enfants", icon: "🦷",
     sheet: "kid_leo",                 // base/fallback sheet (every patient has a variant)
     scale: 1.0,
     origin: { x: 0.5, y: 0.9 },
@@ -185,8 +185,8 @@ window.GAME = {
     [700, 560, "chair", 1.4, { dx: -26, dy: -20, w: 52, h: 28 }],
     [420, 350, "plant", 1.2, { dx: -12, dy: -8, w: 24, h: 12 }],
     [990, 350, "plant", 1.2, { dx: -12, dy: -8, w: 24, h: 12 }],
-    [410, 740, "toothsign", 1.1, { dx: -10, dy: -8, w: 20, h: 12 }],
-    [1000, 740, "toothsign", 1.1, { dx: -10, dy: -8, w: 20, h: 12 }],
+    [410, 740, "toothsign", 0.55, { dx: -10, dy: -8, w: 20, h: 12 }],
+    [1000, 740, "toothsign", 0.55, { dx: -10, dy: -8, w: 20, h: 12 }],
     [200, 520, "plant", 1.3, { dx: -12, dy: -8, w: 24, h: 12 }],
     [1210, 520, "plant", 1.3, { dx: -12, dy: -8, w: 24, h: 12 }],
   ],
@@ -196,11 +196,11 @@ window.GAME = {
   /* ---- Help screen (short sentences for early readers / a parent) ---- */
   help: [
     "<b>Bienvenue chez Dr Smile ! 🦷</b>",
-    "<b>👣 Va voir un patient</b> : appuie sur lui ou marche jusqu'à lui.",
+    "<b>👣 Va voir un enfant</b> : appuie sur lui ou marche jusqu'à lui.",
     "<b>🦷 Soigner</b> : la bouche s'ouvre en grand.",
     "<b>🪥 Frotte les taches</b> avec ton doigt pour toutes les enlever !",
-    "<b>🌟 Bravo !</b> Le patient repart avec un beau sourire et tu gagnes une étoile.",
-    "<b>🔔 La cloche</b> fait entrer de nouveaux patients.",
+    "<b>🌟 Bravo !</b> L'enfant repart avec un beau sourire et tu gagnes une étoile.",
+    "<b>🔔 La cloche</b> fait entrer de nouveaux enfants.",
     "<b>🦷 (en haut)</b> : change de dentiste. 💾 Le jeu se sauvegarde tout seul.",
   ],
 };

@@ -887,13 +887,17 @@ function sceneUpdate(time, delta) {
   const departed = [];
   state.creatures.forEach((c) => {
     if (!c.obj) return;
-    if (c.departing) {                                    // cured → walk to the exit and fade out
+    if (c.departing) {                                    // cured → walk OUT of the room, then fade out
+      const dp = (CREATURE && CREATURE.depart) || {};
+      const sp = dp.speed || 110;
       const dx = c.exitX - c.x, dy = c.exitY - c.y, d = Math.hypot(dx, dy) || 1;
-      if (d > 6) { c.x += (dx / d) * 85 * dt; c.y += (dy / d) * 85 * dt; if (c.bodyT) c.bodyT.setFlipX(dx > 0); }
+      if (d > 6) { c.x += (dx / d) * sp * dt; c.y += (dy / d) * sp * dt; if (c.bodyT) c.bodyT.setFlipX(dx > 0); }
       c.obj.x = c.x; c.obj.y = c.y; c.obj.setDepth(c.y);
       c.departT = (c.departT || 0) + dt;
-      if (c.departT > 0.5) c.obj.alpha = Math.max(0, c.obj.alpha - dt * 0.9);
-      if (d < 10 || c.obj.alpha <= 0.03 || c.departT > 5) departed.push(c);
+      // don't start fading until the child has actually walked out of the clinic (home zone),
+      // so they never vanish mid-room; once outside they fade quickly and are removed.
+      if (leftHome(c)) c.obj.alpha = Math.max(0, c.obj.alpha - dt * 1.6);
+      if (d < 10 || c.obj.alpha <= 0.03 || c.departT > 10) departed.push(c);
       return;
     }
     if (c !== mounted) {
@@ -938,6 +942,13 @@ function sceneUpdate(time, delta) {
   refreshInteraction();
 }
 
+// True once a departing creature has crossed outside the home zone (so fading can begin).
+function leftHome(c) {
+  const z = HOME_ZONE && HOME_ZONE.rect;
+  if (!z) return (c.departT || 0) > 0.4;
+  const m = 8;
+  return c.x < z.x - m || c.x > z.x + z.w + m || c.y < z.y - m || c.y > z.y + z.h + m;
+}
 // A cured creature walks off to an exit and is removed (generic; see creature.depart).
 function departCreature(c) {
   if (!CREATURE || !CREATURE.depart || c.departing) return;

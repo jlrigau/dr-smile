@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Generate Dr Smile world assets: floor tile, dental chair, plant, tooth sign,
 reception desk station, and PWA icons. Soft pastel clinic theme."""
-import os, math
+import os, math, sys
 from PIL import Image, ImageDraw
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from tooth import tight_tooth
 
 OUT = "/home/user/dr-smile/assets"
 
@@ -72,24 +74,22 @@ def plant():
 
 # ---------- happy tooth sign (decor) ----------
 def tooth_sign():
-    W, H = 60, 84
+    # a little sign showing the Dr Smile mascot — the SAME happy tooth as the app icon.
+    # Drawn at 2x then kept hi-res so it stays crisp when the engine scales it down.
+    W, H = 120, 168
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(im); cx = W//2
-    d.ellipse((cx-16, H-10, cx+16, H-2), fill=(0,0,0,40))
+    d.ellipse((cx-32, H-20, cx+32, H-4), fill=(0,0,0,40))
     # stand
-    rr(d, (cx-3, H-30, cx+3, H-6), 2, fill=(150,120,90,255))
-    # board
-    rr(d, (cx-26, 6, cx+26, H-26), 8, fill=(255,255,255,255), outline=(120,200,190,255), width=3)
-    # smiling tooth mascot
-    tx, ty = cx, 30
-    d.pieslice((tx-13, ty-14, tx+13, ty+10), 180, 360, fill=(250,250,255,255), outline=OUTL)
-    d.polygon([(tx-13, ty-2),(tx-13, ty+12),(tx-5, ty+6)], fill=(250,250,255,255), outline=OUTL)
-    d.polygon([(tx+13, ty-2),(tx+13, ty+12),(tx+5, ty+6)], fill=(250,250,255,255), outline=OUTL)
-    d.ellipse((tx-6, ty-6, tx-2, ty-2), fill=(40,40,55,255))
-    d.ellipse((tx+2, ty-6, tx+6, ty-2), fill=(40,40,55,255))
-    d.arc((tx-5, ty-3, tx+5, ty+6), 10, 170, fill=(40,40,55,255), width=2)
-    # sparkle
-    d.line([(tx+9, ty-9),(tx+9, ty-3)], fill=(255,210,90,255), width=2)
-    d.line([(tx+6, ty-6),(tx+12, ty-6)], fill=(255,210,90,255), width=2)
+    rr(d, (cx-6, H-60, cx+6, H-12), 4, fill=(150,120,90,255))
+    # board (soft mint panel)
+    rr(d, (cx-52, 12, cx+52, H-52), 16, fill=(233,248,243,255), outline=(120,200,190,255), width=6)
+    # the mascot tooth, scaled to fill the board (rounded base reads better than the molar notch here)
+    t = tight_tooth(px=320, shadow=False, notch=False)
+    avail = 88
+    sc = avail / max(t.size)
+    t = t.resize((int(t.size[0]*sc), int(t.size[1]*sc)), Image.LANCZOS)
+    by = 16   # board interior top
+    im.alpha_composite(t, (cx - t.size[0]//2, by + (88 - t.size[1])//2))
     im.save(OUT + "/img/toothsign.png")
 
 # ---------- reception desk (station building ~118x150) ----------
@@ -149,6 +149,7 @@ def want_bubble():
     im = im.resize((96, 92), Image.LANCZOS)
     im.save(OUT + "/img/want.png")
 
+tooth_sign()   # refresh the clinic signs with the new mascot tooth
 want_bubble()
 
 

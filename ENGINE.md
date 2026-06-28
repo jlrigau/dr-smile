@@ -138,11 +138,13 @@ It gently bobs, hides during celebration/departure, and needs no other wiring.
 
 ### `creature.depart` (leave after being cured)
 ```
-depart: { to:{x,y}?, emptyMessage? }
+depart: { to:{x,y}?, speed?, emptyMessage? }
 ```
 When present, a creature that triggers `celebrate` (its mood need hits 100) finishes its
-celebration, then **walks to `to` (default: off the bottom) and is removed**. When the
-last one leaves, `emptyMessage` is shown. Pair with a `spawn` station to refill — the
+celebration, then **walks to `to` (default: off the bottom) at `speed` px/s (default 110)
+and is removed**. It stays fully opaque while inside the **home zone** and only begins to
+fade once it has **walked out of that zone**, so it never vanishes mid-room. When the last
+one leaves, `emptyMessage` is shown. Pair with a `spawn` station to refill — the
 "treat → leave → ring for more" loop.
 
 ### Close-up mini-scene (`action.type:"closeup"`)
