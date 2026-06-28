@@ -73,7 +73,29 @@ Use a fresh `meta.saveKey` so it doesn't collide with other games' saves.
   `index.html` + `manifest.webmanifest` (`name`, `short_name`, `theme_color`,
   `apple-mobile-web-app-title`). Keep the iOS/PWA rules (see **ios-pwa-check**).
 
-## Step 5 — Verify & ship
+## Step 5 — Refresh the project `README.md`
+The repo ships a README describing the **engine/template**. Rewrite its **top** to lead
+with the game you just created, and **keep all the technical/template content below**
+(how the template works, iterating, the link to `ENGINE.md`). Concretely:
+1. **Derive the live URL from the repo's own remote** (GitHub Pages serves the default
+   branch — so the link is reconstructed from the repo itself, no guessing):
+   ```bash
+   url=$(git remote get-url origin)
+   slug=$(echo "$url" | sed -E 's#.*[/:]([^/]+/[^/]+?)(\.git)?/?$#\1#')
+   owner=${slug%%/*}; repo=${slug##*/}
+   echo "https://$owner.github.io/$repo/"
+   ```
+2. **Replace the engine intro** (the template's `# …` title + tagline + old "Play the
+   demo" line) with a **game header** built from `meta`: `# <titleIcon> <title>`, the
+   `meta.tagline`, one line on the core loop, the **target audience**, and a prominent
+   **▶ [Play <title>](<pages url>)**.
+3. Add one line that the game is **built on a reusable engine** and that the rest of the
+   README explains how to make your own — then leave the existing sections (*Create a new
+   game*, *iterate*, *ENGINE.md*) **intact**.
+Keep it short and faithful to `meta` — don't invent features the game doesn't have. (The
+**capitalize-learnings** skill keeps this in sync when the game later changes substantially.)
+
+## Step 6 — Verify & ship
 - **test-debug**: `node --check`, serve, run the harness — 0 page errors, core actions
   work, state correct. Look at the screenshots.
 - **map-verify** if the map geometry is custom (walkability empty).
@@ -84,6 +106,8 @@ Use a fresh `meta.saveKey` so it doesn't collide with other games' saves.
   propose adding it to the engine as a separate, generic feature (not game-specific).
 - Keep `game.config.js` the single source of game content.
 - Set `GAME.meta.audience` honestly — the asset skills rely on it for content safety.
+- **Update `README.md`** to lead with the created game + its live GitHub Pages link
+  (derived from the remote), while keeping the template/usage docs below.
 - One safe, coherent, working game beats a half-wired ambitious one.
 
 ## Chaining

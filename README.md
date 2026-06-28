@@ -1,14 +1,26 @@
-# 🎮 Game Engine
+# 🦷 Dr Smile
 
-A **template repository** for building small top-down 2D games (Phaser 3, 100% static,
-no build). The engine is generic: you don't code a game, you **describe** it in one
-config file (`game.config.js`) + assets — or just run the **`/new-game`** skill and
-answer a few questions.
+**Brosse les dents et rends tout le monde heureux !** A gentle dentist game for a 6–7
+year old who is starting to read (French): you play *Dr Smile*, children arrive with
+dirty teeth, the view **zooms onto the open mouth** and you scrub the spots off with a
+finger until the smile shines — then the child leaves happy. No stress, no failure,
+almost no text. For **young kids (6–7)**.
 
-It ships with a working demo, **Nebula Nursery** (a keeper robot tends glowing alien
-critters in a space nursery), so a new game starts from something that already runs.
+▶ **[Play Dr Smile](https://jlrigau.github.io/dr-smile/)**
 
-▶ **[Play the live demo](https://jlrigau.github.io/game-engine/)**
+> Dr Smile is built on a **generic, reusable 2D game engine** (Phaser 3, 100% static, no
+> build). The whole game lives in `game.config.js` + assets; the engine code is never
+> game-specific. The rest of this README is that engine's documentation — **how to build
+> your own game the same way.**
+
+---
+
+# 🎮 The engine behind it
+
+A **template repository** for building small top-down 2D games. The engine is generic:
+you don't code a game, you **describe** it in one config file (`game.config.js`) + assets
+— or just run the **`/new-game`** skill and answer a few questions. Each new game starts
+from something that already runs.
 
 ---
 
