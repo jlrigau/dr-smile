@@ -8,10 +8,13 @@ engine code holds **no game content**; a game is fully described by `game.config
 (`window.GAME`) + assets. Swap config + assets (or run the **new-game** skill) to make a
 different game from the same engine and skills.
 
-Ships a **minimal** neutral demo: **Nebula Nursery** — a keeper robot tends a few
-glowing alien critters in a tiny space nursery (feed/play + mood, one rest station,
-3 simple goals). Deliberately small: richer features (variants, shop, riding, breeding,
-trail loops…) are added by **iterating** on the config, not shipped in the demo.
+Ships a neutral demo that is the engine's **showcase**: **Nebula Nursery** — a keeper
+robot tends glowing alien critters in a space nursery, and the demo turns on (nearly)
+every engine system: care + close-up, variants + happy faces, aging, breeding, riding +
+jumps (Hop Course arena, Comet Trail loop), economy + shop + decorations, station menu +
+paid restyle, spawn portal, deliveries + drone chase, Hatchery models, pseudo-3D race.
+New games still start **minimal** from `.claude/skills/new-game/references/minimal-seed.config.js`.
+Whenever the engine gains a capability, **add it to Nebula too** (it must show everything).
 
 ## 2. Golden rule
 - **`engine.js` is generic — never put game content in it.** All game data, strings,
@@ -60,7 +63,10 @@ economy + shop + capacity + buyable decorations (ghost placement) · AABB collis
 single declarative rule) · day/night with rest-gating · objectives/levels · localStorage
 save with backward-compatible load · PWA/iOS · procedural sound + music (no files) ·
 guide arrow · unlocks (milestones add scenery) · juice (toast queue, flying rewards,
-confetti, cinematic close-up zoom, before/after reveal).
+confetti, cinematic close-up zoom, before/after reveal) · vehicles & city systems
+(top-down `dirSheet` creatures, hidden/seated riders, station menus + paid restyle,
+missions, chase/wanted level, buyable models with stats, pseudo-3D race) · legacy save
+migration (`meta.legacySave`).
 
 ## 7. Skills (`.claude/skills/`)
 Game-agnostic Claude Code skills operating on the config/assets. Orchestrators:
@@ -80,8 +86,9 @@ template). Shared tooling in `_shared/` (incl. `separation-audit.cjs`, `prune-as
 - Engine, config and skills are in **English**. Clear commit messages.
 - Keep `game.config.js` the single source of game content; auto-save stays in place.
 - Set `GAME.meta.audience` honestly — the asset skills rely on it for content safety.
-- **New games start MINIMAL.** A demo/seed should have few features; you grow it by
-  iterating. The engine stays fully capable — features are config-gated, not removed.
+- **New games start MINIMAL** (from the new-game skill's `minimal-seed.config.js`): few
+  features, grown by iterating. The engine stays fully capable — features are config-gated,
+  not removed. The Nebula demo is the opposite: the full showcase of every capability.
 - Demo textures are **generated** and specific to the game's universe (no reuse from a
   different game's art). `meta.showCoins:false` hides the economy; the goals button
   auto-hides when there are no objective levels.
