@@ -25,6 +25,7 @@
   --hud-fade: rgba(255, 255, 255, 0);
   --shadow: 0 10px 26px rgba(120, 100, 130, 0.24);
   --closeup-bg: #fff1f6;
+  --edge-home: #f0d5b7; --edge-game: #f3d9b1;   /* colours at the screen edges (iOS bands) */
   --home-bg: #d9f3ec;
 }
 .pc-name { color: var(--text); }
