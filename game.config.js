@@ -7,14 +7,15 @@
 
    Dr Smile — a gentle dentist game for a 6–7 year old who is
    starting to read (French). You are "Dr Smile" in a cosy
-   little clinic. Walk up to a patient, then the view ZOOMS
-   onto their open mouth: little stains appear on the teeth
-   and the child scrubs them off one by one with a finger.
-   When every tooth is clean → sparkles, the patient leaves
-   radiant, and you earn a star (🌟). No stress, no failure,
-   nothing scary, almost no text — it's all touch + visuals.
+   little clinic. Tap a child: you walk over and the view
+   ZOOMS onto their open mouth; cute little germs sit on the
+   teeth and the child scrubs them off with a finger. When
+   every tooth is clean → sparkles, the patient beams a huge
+   smile, leaves radiant, and you earn a star (🌟). Stars make
+   the clinic grow richer (balloons, aquarium, teddy…).
+   No stress, no failure, nothing scary, almost no text.
 
-   All textures are generated (Pillow) and original (CC0).
+   All art is generated from tools/art/drsmile.cjs (SVG → PNG, CC0).
    ========================================================= */
 
 window.GAME = {
@@ -22,12 +23,13 @@ window.GAME = {
   meta: {
     title: "Dr Smile",
     titleIcon: "🦷",
+    logo: "assets/img/logo.png",
     shortName: "Dr Smile",
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v23",
-    theme: { home: "#ffe0e9", play: "#eaf6f2" },
+    assetVersion: "v24",
+    theme: { home: "#ffe0e9", play: "#cdeee6", closeup: "#fff1f6" },
 
     showCoins: true,
     coinIcon: "🌟",                    // "stars": one per patient made to smile
@@ -42,156 +44,210 @@ window.GAME = {
     createOkLabel: "✅ C'est parti !",
     startLabel: "▶ Jouer",
     continueLabel: "📂 Continuer",
-    continueHint: "Appuie sur « Continuer » pour reprendre. 🦷",
+    continueHint: "Tes patients t'attendent ! 🦷",
     helpTitle: "❓ Comment jouer",
-    closeLabel: "Fermer",              // aria-label of the close-up's ✖ button (a11y)
     ageUnit: "", and: "et",
 
     nightMessage: "✨",
     restBlockedHint: "Occupe-toi d'abord d'un enfant ! 😊",
     neglectMessage: "🌅 De nouveaux enfants arrivent ! 😄",
     morningMessage: "🌅 De nouveaux sourires t'attendent ! ✨",
-    idleHint: "Va voir un enfant 🦷, ou sonne la cloche 🔔 à l'accueil pour en faire venir d'autres.",
+    idleHint: "Appuie sur un enfant pour le soigner 🦷",
+    strings: {
+      closeLabel: "Fermer", soundLabel: "Son", coinsLabel: "Étoiles", noSave: "Pas de partie sauvegardée.",
+    },
   },
 
-  /* ---- World: a small cosy clinic ---- */
-  world: {
-    width: 1400, height: 1000, groundTile: "floor", bg: "#eaf6f2",
+  /* ---- Look & feel: soft hi-res art, gentle sunlight motes ---- */
+  render: {
+    pixelArt: false,
+    vignette: 0.1,
+    selectColor: "#ff8fb3",
+    text: { color: "#ffffff", stroke: "#4a3a4e" },
+    label: { bg: "#ffffff", color: "#3da99e", border: "#ff8fb3", alpha: 0.95, size: 20 },
+    ambient: { particle: "soft", colors: ["#ffffff", "#fff3b0", "#ffd6e6"], count: 16, speed: 7, drift: "up", alpha: [0.15, 0.45], scale: [0.4, 1.0] },
+    confetti: ["#ff8fb3", "#5ec7bd", "#ffd24a", "#a8d8ff", "#c3a6ff", "#ffffff"],
   },
-  camera: { fitW: 720, fitH: 760, min: 0.55, max: 1.1 },
+
+  /* ---- Sound: soft procedural sounds + a cheerful little tune ---- */
+  audio: {
+    volume: 0.65,
+    music: { tempo: 100, root: 60, scale: "majorPenta", progression: [0, 5, 7, 5], pad: "sine", lead: "triangle", density: 0.45, volume: 0.16 },
+  },
+
+  /* ---- A bouncing arrow shows which child needs you (non-readers) ---- */
+  guide: { idle: 3, color: "#ff6f9c", scale: 1.4 },
+
+  /* ---- World: a small cosy clinic (a closed room) ---- */
+  world: { width: 1400, height: 1100, groundTile: "floor", bg: "#f3d9b1" },
+  camera: { fitW: 560, fitH: 660, min: 0.6, max: 1.25, clampToWorld: true },
 
   /* ---- Assets (all generated, CC0) ---- */
   assets: {
     images: {
-      floor: "assets/img/floor.png",
-      chair: "assets/img/chair.png",
-      plant: "assets/img/plant.png",
-      toothsign: "assets/img/toothsign.png",
-      reception: "assets/img/reception.png",
-      // close-up mini-scene: one face backdrop per child + the spot & brush
-      mouth_leo: "assets/img/mouth_leo.png",
-      mouth_mila: "assets/img/mouth_mila.png",
-      mouth_sacha: "assets/img/mouth_sacha.png",
-      mouth_lou: "assets/img/mouth_lou.png",
-      mouth_tom: "assets/img/mouth_tom.png",
-      mouth_zoe: "assets/img/mouth_zoe.png",
-      spot: "assets/img/spot.png",
+      floor: "assets/img/floor.png", rug: "assets/img/rug.png", doormat: "assets/img/doormat.png",
+      wall: "assets/img/wall.png", wall_left: "assets/img/wall_left.png", wall_right: "assets/img/wall_right.png", wall_bottom: "assets/img/wall_bottom.png",
+      chair: "assets/img/chair.png", reception: "assets/img/reception.png",
+      plant: "assets/img/plant.png", plant_b: "assets/img/plant_b.png", toothsign: "assets/img/toothsign.png",
+      bench: "assets/img/bench.png", toybox: "assets/img/toybox.png",
+      // unlockable decorations (the clinic grows with each star)
+      balloons: "assets/img/balloons.png", aquarium: "assets/img/aquarium.png", teddy: "assets/img/teddy.png",
+      rainbow_rug: "assets/img/rainbow_rug.png", trophy: "assets/img/trophy.png",
+      // close-up mini-scene: each child's open mouth + their big smile afterwards
+      mouth_leo: "assets/img/mouth_leo.png", mouth_leo_done: "assets/img/mouth_leo_done.png",
+      mouth_mila: "assets/img/mouth_mila.png", mouth_mila_done: "assets/img/mouth_mila_done.png",
+      mouth_sacha: "assets/img/mouth_sacha.png", mouth_sacha_done: "assets/img/mouth_sacha_done.png",
+      mouth_lou: "assets/img/mouth_lou.png", mouth_lou_done: "assets/img/mouth_lou_done.png",
+      mouth_tom: "assets/img/mouth_tom.png", mouth_tom_done: "assets/img/mouth_tom_done.png",
+      mouth_zoe: "assets/img/mouth_zoe.png", mouth_zoe_done: "assets/img/mouth_zoe_done.png",
+      germ_green: "assets/img/germ_green.png", germ_purple: "assets/img/germ_purple.png", germ_orange: "assets/img/germ_orange.png",
       brush: "assets/img/brush.png",
       want: "assets/img/want.png",       // "needs care" bubble floating over a child with dirty teeth
     },
     sheets: {
-      drsmile: { path: "assets/sheet/drsmile.png", frameWidth: 64, frameHeight: 64 },
-      drsmile_pink: { path: "assets/sheet/drsmile_pink.png", frameWidth: 64, frameHeight: 64 },
-      // the child patients — each its own 4-frame sheet (boys & girls)
-      kid_leo: { path: "assets/sheet/kid_leo.png", frameWidth: 64, frameHeight: 64 },
-      kid_mila: { path: "assets/sheet/kid_mila.png", frameWidth: 64, frameHeight: 64 },
-      kid_sacha: { path: "assets/sheet/kid_sacha.png", frameWidth: 64, frameHeight: 64 },
-      kid_lou: { path: "assets/sheet/kid_lou.png", frameWidth: 64, frameHeight: 64 },
-      kid_tom: { path: "assets/sheet/kid_tom.png", frameWidth: 64, frameHeight: 64 },
-      kid_zoe: { path: "assets/sheet/kid_zoe.png", frameWidth: 64, frameHeight: 64 },
+      drsmile: { path: "assets/sheet/drsmile.png", frameWidth: 128, frameHeight: 128 },
+      drsmile_pink: { path: "assets/sheet/drsmile_pink.png", frameWidth: 128, frameHeight: 128 },
+      // the child patients — a worried sheet (arriving) and a happy sheet (cured)
+      kid_leo: { path: "assets/sheet/kid_leo.png", frameWidth: 128, frameHeight: 128 },
+      kid_leo_happy: { path: "assets/sheet/kid_leo_happy.png", frameWidth: 128, frameHeight: 128 },
+      kid_mila: { path: "assets/sheet/kid_mila.png", frameWidth: 128, frameHeight: 128 },
+      kid_mila_happy: { path: "assets/sheet/kid_mila_happy.png", frameWidth: 128, frameHeight: 128 },
+      kid_sacha: { path: "assets/sheet/kid_sacha.png", frameWidth: 128, frameHeight: 128 },
+      kid_sacha_happy: { path: "assets/sheet/kid_sacha_happy.png", frameWidth: 128, frameHeight: 128 },
+      kid_lou: { path: "assets/sheet/kid_lou.png", frameWidth: 128, frameHeight: 128 },
+      kid_lou_happy: { path: "assets/sheet/kid_lou_happy.png", frameWidth: 128, frameHeight: 128 },
+      kid_tom: { path: "assets/sheet/kid_tom.png", frameWidth: 128, frameHeight: 128 },
+      kid_tom_happy: { path: "assets/sheet/kid_tom_happy.png", frameWidth: 128, frameHeight: 128 },
+      kid_zoe: { path: "assets/sheet/kid_zoe.png", frameWidth: 128, frameHeight: 128 },
+      kid_zoe_happy: { path: "assets/sheet/kid_zoe_happy.png", frameWidth: 128, frameHeight: 128 },
     },
   },
 
   /* ---- Player (Dr Smile) ---- */
   player: {
-    scale: 1.6,
-    speed: { walk: 200, run: 360 },
-    spawn: { x: 700, y: 760 },
+    scale: 0.92,
+    speed: { walk: 240, run: 400 },
+    spawn: { x: 700, y: 990 },
+    nameY: -128,
+    shadow: { w: 40, h: 12 },
   },
   characters: [
     { id: "mint", name: "Dr Smile", sheet: "drsmile", thumb: "drsmile_thumb" },
     { id: "rose", name: "Dr Rose", sheet: "drsmile_pink", thumb: "drsmile_pink_thumb" },
   ],
 
-  /* ---- Patients: one big tap-friendly action → the open-mouth mini-scene ----
-     "propre" + "sourire" drive the mood heart (grumpy red → radiant green) and
-     are filled to 100 when the mouth is fully cleaned. No bars, no reading. */
+  /* ---- Patients: tap a child → walk over → the open-mouth mini-scene starts ----
+     "propre" + "sourire" drive their mood and are filled to 100 when the mouth is
+     fully cleaned. No bars, no reading. */
   creature: {
     label: "enfants", icon: "🦷",
     sheet: "kid_leo",                 // base/fallback sheet (every patient has a variant)
-    scale: 1.0,
-    origin: { x: 0.5, y: 0.9 },
-    walk: { start: 0, end: 3, frameRate: 5 },
-    // Above each child: a "needs care" bubble (dirty tooth) instead of an abstract mood heart.
-    // It pops up now and then (intermittent, desynced per child) while their teeth are dirty —
-    // like the kids occasionally piping up "viens t'occuper de moi" — and stops once cured.
-    wantBubble: { sprite: "want", need: "propre", below: 100, scale: 0.6, lift: 8,
-                  intermittent: true, showFor: 2.5, hideMin: 5, hideMax: 12 },
+    scale: 0.9,
+    origin: { x: 0.5, y: 0.95 },
+    headY: 100,
+    shadow: { w: 52, h: 14 },
+    walk: { start: 0, end: 3, frameRate: 6, hop: 4, hopPeriod: 240, speed: 42 },
+    arrive: { speed: 130 },
+    tapAction: "treat",               // one tap on a child = walk over AND open the mouth (young kids)
+    // Above each child: a "needs care" bubble (tooth + germ) — it pops up now and then
+    // (intermittent, desynced per child) while their teeth are dirty, and stops once cured.
+    wantBubble: { sprite: "want", need: "propre", below: 100, scale: 0.55, lift: 6,
+                  intermittent: true, showFor: 2.5, hideMin: 4, hideMax: 9 },
     moodNeed: "sourire",
     moodFrom: ["propre", "sourire"],
     moodDay: { base: 0, lowPenalty: 0, lowAt: 0, highBonus: 0, highAt: 200 },
-    showBars: false,                  // young kids: rely on the mood heart, not bars
+    showBars: false,                  // young kids: no bars
     needs: [
       { id: "propre", icon: "🦷", start: 0, perDay: -95 },   // arrives with dirty teeth
-      { id: "sourire", icon: "😊", start: 25, perDay: -60 }, // arrives a bit grumpy
+      { id: "sourire", icon: "😊", start: 25, perDay: -60 }, // arrives a bit worried
     ],
     actions: [
       { id: "treat", type: "closeup", label: "Soigner", icon: "🦷",
         closeup: {
-          bg: "mouth_leo", spotSprite: "spot", brush: "brush",   // bg overridden per child (variant.closeupBg)
-          brushTip: { x: 0.28, y: 0.16 },   // active scrub point = the bristle head of the brush sprite
-          // spots ramp up as the child cures more patients (the progression)
-          spots: { base: 4, growEvery: 2, max: 8, rubs: 3, size: 56,
-                   // two zones (fractions of the face image): upper + lower teeth.
-                   // Spots alternate between them so both rows get dirty.
-                   area: [ { x: 0.36, y: 0.50, w: 0.28, h: 0.045 },
-                           { x: 0.37, y: 0.665, w: 0.26, h: 0.038 } ] },
+          bg: "mouth_leo", bgDone: "mouth_leo_done",              // overridden per child (variant.closeupBg / closeupBgDone)
+          spotSprites: ["germ_green", "germ_purple", "germ_orange"], brush: "brush",
+          brushTip: { x: 0.21, y: 0.27 },   // active scrub point = the bristle head of the brush sprite
+          // germs ramp up as the child cures more patients (the progression)
+          spots: { base: 3, growEvery: 2, max: 8, rubs: 3, size: 86, minGap: 0.06,
+                   // two rows (fractions of the face image): upper + lower teeth
+                   area: [ { x: 0.34, y: 0.58, w: 0.32, h: 0.022 },
+                           { x: 0.385, y: 0.705, w: 0.23, h: 0.016 } ] },
           finishParticles: ["⭐", "💖", "✨", "🌟", "😄"],
+          popParticles: ["✨", "🫧"],
+          foam: { colors: ["#ffffff", "#e8fbff", "#dff6f0"] },
         },
         effects: { propre: 100, sourire: 100 }, reward: 1, stat: "smile",
         message: "🌟",
         celebrateMessage: "💖 Bravo ! {name} a un sourire tout neuf ! 🌟" },
     ],
-    celebrate: { mode: "hop", particle: "heart", colors: ["#ff9ec4", "#ffd24a", "#a8e6ff", "#7fd06f"], count: 10 },
-    // After being cured & celebrating, the child walks out happily and leaves.
-    depart: { to: { x: 700, y: 1080 },
+    celebrate: { mode: "hop", particle: "heart", colors: ["#ff9ec4", "#ffd24a", "#a8e6ff", "#7fd06f"], count: 12 },
+    // After being cured & celebrating, the child walks out happily through the door.
+    depart: { to: { x: 700, y: 1170 }, speed: 130,
               emptyMessage: "🔔 Bravo ! Sonne la cloche pour faire venir d'autres enfants !" },
 
-    // The child patients: boys & girls, each its own sprite (animated per-variant).
+    // The child patients: boys & girls, each a person with their own sprite, face and name.
     variants: [
-      { id: "leo", name: "Léo", sheet: "kid_leo", closeupBg: "mouth_leo", color: "#5aa9e6" },       // boy
-      { id: "mila", name: "Mila", sheet: "kid_mila", closeupBg: "mouth_mila", color: "#ff8fb3" },   // girl
-      { id: "sacha", name: "Sacha", sheet: "kid_sacha", closeupBg: "mouth_sacha", color: "#6cc47a" }, // boy
-      { id: "lou", name: "Lou", sheet: "kid_lou", closeupBg: "mouth_lou", color: "#ffd24a" },       // girl
-      { id: "tom", name: "Tom", sheet: "kid_tom", closeupBg: "mouth_tom", color: "#ef6a6a" },       // boy
-      { id: "zoe", name: "Zoé", sheet: "kid_zoe", closeupBg: "mouth_zoe", color: "#b48ae6" },       // girl
+      { id: "leo", name: "Léo", fixedName: true, sheet: "kid_leo", happySheet: "kid_leo_happy", closeupBg: "mouth_leo", closeupBgDone: "mouth_leo_done", thumb: "assets/ui/kid_leo.png", color: "#5aa9e6" },
+      { id: "mila", name: "Mila", fixedName: true, sheet: "kid_mila", happySheet: "kid_mila_happy", closeupBg: "mouth_mila", closeupBgDone: "mouth_mila_done", thumb: "assets/ui/kid_mila.png", color: "#ff8fb3" },
+      { id: "sacha", name: "Sacha", fixedName: true, sheet: "kid_sacha", happySheet: "kid_sacha_happy", closeupBg: "mouth_sacha", closeupBgDone: "mouth_sacha_done", thumb: "assets/ui/kid_sacha.png", color: "#6cc47a" },
+      { id: "lou", name: "Lou", fixedName: true, sheet: "kid_lou", happySheet: "kid_lou_happy", closeupBg: "mouth_lou", closeupBgDone: "mouth_lou_done", thumb: "assets/ui/kid_lou.png", color: "#ffd24a" },
+      { id: "tom", name: "Tom", fixedName: true, sheet: "kid_tom", happySheet: "kid_tom_happy", closeupBg: "mouth_tom", closeupBgDone: "mouth_tom_done", thumb: "assets/ui/kid_tom.png", color: "#ef6a6a" },
+      { id: "zoe", name: "Zoé", fixedName: true, sheet: "kid_zoe", happySheet: "kid_zoe_happy", closeupBg: "mouth_zoe", closeupBgDone: "mouth_zoe_done", thumb: "assets/ui/kid_zoe.png", color: "#b48ae6" },
     ],
 
-    names: ["Léo", "Mila", "Sacha", "Lou", "Tom", "Zoé", "Nina", "Hugo", "Jade", "Sami", "Lina", "Noé"],
-    startCount: 4,                     // a few children to start; ring the bell for more
+    names: ["Nina", "Hugo", "Jade", "Sami", "Lina", "Noé"],
+    startCount: 3,                     // a few children to start; ring the bell for more
     startCreatures: [
       { name: "Léo", variant: "leo" },
       { name: "Mila", variant: "mila" },
-      { name: "Sacha", variant: "sacha" },
       { name: "Lou", variant: "lou" },
     ],
   },
 
-  /* ---- The care room (no fence: a cosy rug where patients gather) ---- */
+  /* ---- The care room: a soft rug where patients wait ---- */
   zones: [
-    { id: "room", home: true, rect: { x: 360, y: 280, w: 680, h: 520 },
-      fence: false, tint: "#bfe6df", tintAlpha: 0.55, label: "Cabinet dentaire" },
+    { id: "room", home: true, rect: { x: 330, y: 430, w: 740, h: 540 }, floor: "rug" },
   ],
 
-  /* ---- Reception desk: ring the bell to bring a fresh group of children ---- */
+  /* ---- Reception desk: ring the big golden bell to bring a fresh group of children ---- */
   stations: [
-    { type: "desk", x: 700, y: 165, sprite: "reception", scale: 1.0, label: "Accueil",
-      box: { dx: -58, dy: -56, w: 116, h: 70 },
+    { type: "desk", x: 700, y: 352, sprite: "reception", scale: 0.9, label: "🔔 Accueil", labelY: 30,
+      box: { dx: -138, dy: -66, w: 276, h: 70 }, reach: 130, tapRadius: 110,
       action: "spawn", actionLabel: "🔔 Faire venir des enfants",
-      spawn: { min: 3, max: 5, cap: 6,
-               message: "🔔 De nouveaux enfants arrivent ! 😄",
+      spawn: { min: 3, max: 4, cap: 6, from: { x: 700, y: 1090 },
+               message: "🔔 Ding ! De nouveaux enfants arrivent ! 😄",
                fullMessage: "Le cabinet est déjà plein ! 😊" } },
   ],
 
-  /* ---- Cosy scenery: the big chair (centrepiece) + plants & happy-tooth signs ---- */
+  /* ---- The clinic: walls, door, the big chair (centrepiece), plants & toys ---- */
   scenery: [
-    [700, 560, "chair", 1.4, { dx: -26, dy: -20, w: 52, h: 28 }],
-    [420, 350, "plant", 1.2, { dx: -12, dy: -8, w: 24, h: 12 }],
-    [990, 350, "plant", 1.2, { dx: -12, dy: -8, w: 24, h: 12 }],
-    [410, 740, "toothsign", 0.55, { dx: -10, dy: -8, w: 20, h: 12 }],
-    [1000, 740, "toothsign", 0.55, { dx: -10, dy: -8, w: 20, h: 12 }],
-    [200, 520, "plant", 1.3, { dx: -12, dy: -8, w: 24, h: 12 }],
-    [1210, 520, "plant", 1.3, { dx: -12, dy: -8, w: 24, h: 12 }],
+    { x: 0, y: 0, sprite: "wall", origin: { x: 0, y: 0 }, depth: 0, box: { dx: 0, dy: 0, w: 1400, h: 262 } },
+    { x: 0, y: 0, sprite: "wall_left", origin: { x: 0, y: 0 }, depth: 5, box: false },
+    { x: 1360, y: 0, sprite: "wall_right", origin: { x: 0, y: 0 }, depth: 5, box: false },
+    { x: 0, y: 1040, sprite: "wall_bottom", origin: { x: 0, y: 0 }, depth: 1200, box: false },
+    { x: 700, y: 1000, sprite: "doormat", ground: true, scale: 0.9 },
+    { x: 700, y: 700, sprite: "chair", scale: 0.78, box: { dx: -64, dy: -46, w: 128, h: 50 } },
+    { x: 100, y: 360, sprite: "plant", scale: 0.85, anim: "sway", box: { dx: -28, dy: -14, w: 56, h: 18 } },
+    { x: 1300, y: 360, sprite: "plant_b", scale: 0.85, anim: "sway", box: { dx: -28, dy: -14, w: 56, h: 18 } },
+    { x: 110, y: 990, sprite: "plant_b", scale: 0.8, anim: "sway", box: { dx: -26, dy: -14, w: 52, h: 18 } },
+    { x: 1290, y: 990, sprite: "plant", scale: 0.8, anim: "sway", box: { dx: -26, dy: -14, w: 52, h: 18 } },
+    { x: 180, y: 600, sprite: "bench", scale: 0.68, box: { dx: -84, dy: -30, w: 168, h: 34 } },
+    { x: 1215, y: 620, sprite: "toybox", scale: 0.7, box: { dx: -56, dy: -30, w: 112, h: 34 } },
+    { x: 400, y: 1010, sprite: "toothsign", scale: 0.55, anim: "sway", box: { dx: -12, dy: -8, w: 24, h: 12 } },
+  ],
+
+  /* ---- Unlocks: every few stars the clinic gets a new surprise (no reading needed) ---- */
+  unlocks: [
+    { id: "balloons", when: { stat: "smile", atLeast: 2 }, message: "🎈 Des ballons pour le cabinet !",
+      scenery: { x: 500, y: 410, sprite: "balloons", scale: 0.68, anim: "bob", box: { dx: -14, dy: -10, w: 28, h: 12 } } },
+    { id: "aquarium", when: { stat: "smile", atLeast: 4 }, message: "🐠 Un aquarium avec des poissons !",
+      scenery: { x: 1210, y: 860, sprite: "aquarium", scale: 0.7, box: { dx: -72, dy: -24, w: 144, h: 28 } } },
+    { id: "teddy", when: { stat: "smile", atLeast: 6 }, message: "🧸 Un gros nounours tout doux !",
+      scenery: { x: 200, y: 830, sprite: "teddy", scale: 0.68, anim: "breathe", box: { dx: -40, dy: -14, w: 80, h: 18 } } },
+    { id: "rainbow", when: { stat: "smile", atLeast: 9 }, message: "🌈 Un tapis arc-en-ciel !",
+      scenery: { x: 1020, y: 1000, sprite: "rainbow_rug", ground: true, scale: 0.55 } },
+    { id: "trophy", when: { stat: "smile", atLeast: 12 }, message: "🏆 Le trophée du meilleur dentiste !",
+      scenery: { x: 900, y: 420, sprite: "trophy", scale: 0.6, glow: "#ffd24a", glowY: 70, box: { dx: -26, dy: -12, w: 52, h: 16 } } },
   ],
 
   /* ---- No objectives screen: too much reading for this age (kept off). ---- */
@@ -199,11 +255,11 @@ window.GAME = {
   /* ---- Help screen (short sentences for early readers / a parent) ---- */
   help: [
     "<b>Bienvenue chez Dr Smile ! 🦷</b>",
-    "<b>👣 Va voir un enfant</b> : appuie sur lui ou marche jusqu'à lui.",
-    "<b>🦷 Soigner</b> : la bouche s'ouvre en grand.",
-    "<b>🪥 Frotte les taches</b> avec ton doigt pour toutes les enlever !",
-    "<b>🌟 Bravo !</b> L'enfant repart avec un beau sourire et tu gagnes une étoile.",
-    "<b>🔔 La cloche</b> fait entrer de nouveaux enfants.",
-    "<b>🦷 (en haut)</b> : change de dentiste. 💾 Le jeu se sauvegarde tout seul.",
+    "<b>👆 Appuie sur un enfant</b> : tu vas vers lui et sa bouche s'ouvre en grand.",
+    "<b>🪥 Frotte les microbes</b> avec ton doigt pour les faire partir !",
+    "<b>🌟 Bravo !</b> L'enfant a un grand sourire et tu gagnes une étoile.",
+    "<b>🎁 Surprises</b> : avec les étoiles, ton cabinet se remplit de cadeaux.",
+    "<b>🔔 La cloche</b> de l'accueil fait entrer de nouveaux enfants.",
+    "<b>🧑‍⚕️ 🔊 (en haut)</b> : change de dentiste, coupe le son. 💾 Le jeu se sauvegarde tout seul.",
   ],
 };

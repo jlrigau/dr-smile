@@ -11,15 +11,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Dr Smile" />
   <title>Dr Smile</title>
-  <link rel="manifest" href="manifest.webmanifest?v=v23" />
-  <link rel="icon" type="image/png" href="assets/favicon.png?v=v23" />
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=v23" />
-  <link rel="stylesheet" href="style.css?v=v23" />
+  <link rel="manifest" href="manifest.webmanifest?v=v24" />
+  <link rel="icon" type="image/png" href="assets/favicon.png?v=v24" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=v24" />
+  <link rel="preload" href="vendor/fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="engine.css?v=v24" />
+  <link rel="stylesheet" href="style.css?v=v24" />
 </head>
 <body>
   <!-- Home -->
   <div id="screen-home" class="screen">
     <div class="box-home">
+      <img id="home-logo" class="home-logo hidden" alt="" draggable="false" />
       <h1 id="home-title" class="game-title">Game</h1>
       <p id="home-tagline" class="subtitle"></p>
       <label id="home-name-label" class="name-label" for="place-name-input">Name your place:</label>
@@ -28,6 +31,7 @@
       <button id="btn-continue" class="btn btn-secondary">Continue</button>
       <p id="home-msg" class="home-msg"></p>
       <button id="btn-refresh" class="btn-refresh" title="Clear cache and reload">🔄 Refresh (clear cache)</button>
+      <div id="app-version" class="app-version"></div>
     </div>
   </div>
 
@@ -49,6 +53,7 @@
         <div class="hud-actions">
           <button id="btn-goals" class="mini-btn" title="Goals">🎯</button>
           <button id="btn-me" class="mini-btn" title="Change my look">🧍</button>
+          <button id="btn-sound" class="mini-btn" title="Sound">🔊</button>
           <button id="btn-help" class="mini-btn" title="Help">❓</button>
         </div>
       </div>
@@ -88,8 +93,8 @@
   <!-- Night veil ("rest" transition), fullscreen -->
   <div id="night-veil"></div>
 
-  <script src="vendor/phaser.min.js?v=v23"></script>
-  <script src="game.config.js?v=v23"></script>
-  <script src="engine.js?v=v23"></script>
+  <script src="vendor/phaser.min.js?v=v24"></script>
+  <script src="game.config.js?v=v24"></script>
+  <script src="engine.js?v=v24"></script>
 </body>
 </html>
