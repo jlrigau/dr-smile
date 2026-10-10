@@ -139,4 +139,34 @@ like a game made by a studio — not a prototype. Concretely:
 - **iOS layout is checked in every state** (Safari tab, home-screen app at launch and after
   iOS corrects the viewport, after a scroll / keyboard): `ios-standalone-check.cjs`. Never
   claim an iOS layout fix from a single simulated state.
+- **Communication**: answer in French, no jargon; explain cause → fix → what was tested and what
+  was NOT (honestly); announce every release with the build number to check at the bottom of the
+  home screen (the owner's screenshots often come from an older build — ask). Never claim an
+  improvement that is not visible. Batch releases while he is testing.
+- **Shared repos**: never assume a cross-session message is current (they arrive late); wait for an
+  explicit answer before pushing to a repo another session works on. `pkill -f "http.server N"` kills
+  your own shell when the command line contains that string — find the pid (`ss -ltnp`) and `kill` it.
 - New owner feedback → add it to this section (via **capitalize-learnings**).
+
+## 10. This game — « Dr Smile » (dr-smile)
+- Gentle dentist game for a 6–7 year-old early reader (French). Live: https://jlrigau.github.io/dr-smile/
+- Since Oct 2026 the engine, all 4 game repos and the template are maintained from ONE session; the
+  engine layer is identical in every repo (copy it verbatim after any engine change, batch engine
+  changes: each sync bumps Dr Smile and reloads the owner's game mid-test).
+- Non-obvious tuning: camera {fitW:560, fitH:660, min:0.6, max:1.25, clampToWorld:true}; close-up
+  spots {base:3, growEvery:2, max:8, size:86, minGap:0.06} with areas from spotAreas() in
+  tools/art/drsmile.cjs (D-shaped mouth); tapAction:"treat" + showMood:false (non-readers);
+  --edge-home #f0d5b7 / --edge-game #f3d9b1; the home splash bottom must show the 3 kids on short
+  screens; HIDPI rules in drsmile.cjs (icons ×2, ui ×6, mouth_/splash webp ×2).
+- Pre-push checklist: serve + bump-version; tour.cjs in --engine webkit --device "iPhone 13" AND
+  --viewport 390x844 (pageErrors [], errors [], coinsGained 1); probes/watchdog.cjs (webkit);
+  REVEAL=teddy probes/reveal.cjs (filmstrip + progress bar width equal at easy/max); 
+  ios-standalone-check.cjs (3 identical states, shifted {0,0}); separation-audit; art-check + full-size
+  crops for any art change; then push and wait for the live index to serve the new ?v=.
+- Tried and REJECTED for the iOS bottom band: measuring the viewport gap (--vp-gap) — iOS corrects
+  the viewport silently and everything shifted down. Kept: html.ios-app + --app-h, scroll lock,
+  per-screen edge colours, stale-page guard.
+- Open / unconfirmed with the owner: the "character stuck, only a reload helps" report was never
+  reproduced (stress.cjs 110+ steps) — the freeze watchdog is validated in simulation only; the iOS
+  layout fixes and the new app icon (remove + re-add the home-screen shortcut) are not yet confirmed
+  on a real iPhone; sound never checked on a device. Always ask which build number is shown.
