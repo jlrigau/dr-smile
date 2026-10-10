@@ -9,44 +9,22 @@
 
 :root {
   --game-font: "Fredoka", ui-rounded, "Trebuchet MS", system-ui, sans-serif;
-  --deep: #eaf6f2;          /* app background (soft mint) */
-  --panel: #ffffff;         /* cards / panels */
-  --panel2: #f2f8f6;
-  --text: #4a3a4e;          /* soft plum (readable on light) */
-  --muted: #8a7f92;
-  --title: #3da99e;
+  --deep: #eaf6f2;
+  --panel: #ffffff; --panel2: #f1f8f6; --panel-edge: #ffd2e0;
+  --sheet-bg: rgba(255, 255, 255, 0.9); --sheet-fade: rgba(255, 240, 246, 0.35);
+  --text: #4a3a4e; --muted: #8a7f92; --title: #3a9f95;
+  --title-fill: #ffffff; --title-stroke: #3a9f95;
   --primary: #5ec7bd; --primary-d: #3a9f95; --on-primary: #ffffff;
-  --accent: #ff8fb3; --accent-d: #e46a92; --on-accent: #ffffff;
+  --accent: #ff8fb3; --accent-d: #e2678f; --on-accent: #ffffff;
+  --ribbon: #ff8fb3; --ribbon-d: #e2678f;
   --good: #5fcf86; --warn: #ffc24a; --bad: #ff7a95;
-  --border: #dfece8;
-  --input-bg: #f4faf8;
-  --chip-bg: rgba(255, 255, 255, 0.9); --chip-text: #4a3a4e; --chip-border: rgba(255, 143, 179, 0.35);
+  --border: #dfece8; --input-bg: #f6fbfa;
+  --chip-bg: rgba(255, 255, 255, 0.94); --chip-text: #4a3a4e; --chip-edge: #ffd2e0;
   --overlay: rgba(74, 58, 78, 0.35);
   --night: #3a4a6e;
   --hud-fade: rgba(255, 255, 255, 0);
-  --shadow: 0 8px 24px rgba(120, 100, 130, 0.22);
-  --title-shadow: 0 3px 0 #ffd6e4;
+  --shadow: 0 10px 26px rgba(120, 100, 130, 0.24);
   --closeup-bg: #fff1f6;
-  --home-bg:
-    radial-gradient(900px 640px at 15% -5%, #ffe0ec 0%, rgba(255, 224, 236, 0) 60%),
-    radial-gradient(900px 700px at 100% 105%, #cdeee6 0%, rgba(205, 238, 230, 0) 55%),
-    linear-gradient(180deg, #fff6f9 0%, #eaf6f2 100%);
+  --home-bg: #d9f3ec;
 }
-
-/* floating bubbles behind the menus */
-#screen-home, #screen-create {
-  background-image:
-    radial-gradient(circle at 12% 22%, rgba(255, 143, 179, 0.25) 0 18px, transparent 19px),
-    radial-gradient(circle at 86% 16%, rgba(94, 199, 189, 0.25) 0 26px, transparent 27px),
-    radial-gradient(circle at 80% 78%, rgba(255, 210, 74, 0.25) 0 22px, transparent 23px),
-    radial-gradient(circle at 18% 84%, rgba(168, 216, 255, 0.3) 0 30px, transparent 31px),
-    radial-gradient(circle at 50% 6%, rgba(195, 166, 255, 0.22) 0 14px, transparent 15px);
-  animation: bubbles 7s ease-in-out infinite alternate;
-}
-@keyframes bubbles { from { background-position: 0 0; } to { background-position: 0 -26px; } }
-
-.box-home, .box-create { border: 4px solid #ffd6e4; }
-.game-title { font-size: 2.6rem; }
-.panel:not(.idle) { border: 3px solid #ffd6e4; }
-.modal-content { border: 4px solid #ffd6e4; }
-.game-message { border: 3px solid #ffd6e4; }
+.pc-name { color: var(--text); }

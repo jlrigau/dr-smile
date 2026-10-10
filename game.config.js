@@ -11,7 +11,7 @@
    ZOOMS onto their open mouth; cute little germs sit on the
    teeth and the child scrubs them off with a finger. When
    every tooth is clean → sparkles, the patient beams a huge
-   smile, leaves radiant, and you earn a star (🌟). Stars make
+   smile, leaves radiant, and you earn a star. Stars make
    the clinic grow richer (balloons, aquarium, teddy…).
    No stress, no failure, nothing scary, almost no text.
 
@@ -22,17 +22,18 @@ window.GAME = {
   /* ---- Identity, theming, UI strings (French) ---- */
   meta: {
     title: "Dr Smile",
-    titleIcon: "🦷",
+    titleIcon: "tooth",
     logo: "assets/img/logo.png",
+    splash: "assets/img/splash.png",   // full-screen illustration behind the home & create screens
     shortName: "Dr Smile",
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v24",
+    assetVersion: "v25",
     theme: { home: "#ffe0e9", play: "#cdeee6", closeup: "#fff1f6" },
 
     showCoins: true,
-    coinIcon: "🌟",                    // "stars": one per patient made to smile
+    coinIcon: "star",                  // "stars": one per patient made to smile
     showDay: false,                    // keep the HUD tiny for young kids
     showCreatureCount: false,
 
@@ -40,22 +41,32 @@ window.GAME = {
     startName: "Mon cabinet",
     namePromptYou: "Ton prénom",
     avatarPrompt: "Choisis ton ou ta dentiste",
-    createTitle: "🦷 Choisis ton ou ta dentiste",
-    createOkLabel: "✅ C'est parti !",
-    startLabel: "▶ Jouer",
-    continueLabel: "📂 Continuer",
-    continueHint: "Tes patients t'attendent ! 🦷",
-    helpTitle: "❓ Comment jouer",
+    createTitle: "Choisis ton ou ta dentiste",
+    createOkLabel: "C'est parti !",
+    startLabel: "Jouer",
+    continueLabel: "Continuer",
+    continueHint: "Tes patients t'attendent !",
+    helpTitle: "{i:help} Comment jouer",
     ageUnit: "", and: "et",
 
-    nightMessage: "✨",
-    restBlockedHint: "Occupe-toi d'abord d'un enfant ! 😊",
-    neglectMessage: "🌅 De nouveaux enfants arrivent ! 😄",
-    morningMessage: "🌅 De nouveaux sourires t'attendent ! ✨",
-    idleHint: "Appuie sur un enfant pour le soigner 🦷",
+    nightMessage: "{i:sparkle}",
+    restBlockedHint: "Occupe-toi d'abord d'un enfant !",
+    neglectMessage: "De nouveaux enfants arrivent !",
+    morningMessage: "{i:sparkle} De nouveaux sourires t'attendent !",
+    idleHint: "Appuie sur un enfant pour le soigner",
     strings: {
-      closeLabel: "Fermer", soundLabel: "Son", coinsLabel: "Étoiles", noSave: "Pas de partie sauvegardée.",
+      closeLabel: "Fermer", soundLabel: "Son", coinsLabel: "Étoiles", noSave: "Pas de partie sauvegardée.", refreshLabel: "Rafraîchir",
     },
+  },
+
+  /* ---- Illustrated UI icons (tools/art/drsmile.cjs → assets/ui/icons). Any text can embed {i:key}. ---- */
+  icons: {
+    star: "assets/ui/icons/star.png", heart: "assets/ui/icons/heart.png", heartEmpty: "assets/ui/icons/heartEmpty.png", sound: "assets/ui/icons/sound.png",
+    soundOff: "assets/ui/icons/soundOff.png", help: "assets/ui/icons/help.png", avatar: "assets/ui/icons/avatar.png", goals: "assets/ui/icons/goals.png",
+    close: "assets/ui/icons/close.png", play: "assets/ui/icons/play.png", resume: "assets/ui/icons/resume.png", check: "assets/ui/icons/check.png",
+    gift: "assets/ui/icons/gift.png", hand: "assets/ui/icons/hand.png", sparkle: "assets/ui/icons/sparkle.png", bell: "assets/ui/icons/bell.png",
+    refresh: "assets/ui/icons/refresh.png", arrow: "assets/ui/icons/arrow.png", trophy: "assets/ui/icons/trophy.png", joy: "assets/ui/icons/joy.png",
+    tooth: "assets/ui/icons/tooth.png", brush: "assets/ui/icons/brush.png", germ: "assets/ui/icons/germ.png", kid: "assets/ui/icons/kid.png",
   },
 
   /* ---- Look & feel: soft hi-res art, gentle sunlight motes ---- */
@@ -140,7 +151,7 @@ window.GAME = {
      "propre" + "sourire" drive their mood and are filled to 100 when the mouth is
      fully cleaned. No bars, no reading. */
   creature: {
-    label: "enfants", icon: "🦷",
+    label: "enfants", icon: "kid",
     sheet: "kid_leo",                 // base/fallback sheet (every patient has a variant)
     scale: 0.9,
     origin: { x: 0.5, y: 0.95 },
@@ -157,12 +168,13 @@ window.GAME = {
     moodFrom: ["propre", "sourire"],
     moodDay: { base: 0, lowPenalty: 0, lowAt: 0, highBonus: 0, highAt: 200 },
     showBars: false,                  // young kids: no bars
+    showMood: false,                  // the "needs care" bubble already says it all
     needs: [
-      { id: "propre", icon: "🦷", start: 0, perDay: -95 },   // arrives with dirty teeth
-      { id: "sourire", icon: "😊", start: 25, perDay: -60 }, // arrives a bit worried
+      { id: "propre", icon: "tooth", start: 0, perDay: -95 },   // arrives with dirty teeth
+      { id: "sourire", icon: "joy", start: 25, perDay: -60 }, // arrives a bit worried
     ],
     actions: [
-      { id: "treat", type: "closeup", label: "Soigner", icon: "🦷",
+      { id: "treat", type: "closeup", label: "Soigner", icon: "brush", color: "#5ec7bd",
         closeup: {
           bg: "mouth_leo", bgDone: "mouth_leo_done",              // overridden per child (variant.closeupBg / closeupBgDone)
           spotSprites: ["germ_green", "germ_purple", "germ_orange"], brush: "brush",
@@ -170,20 +182,20 @@ window.GAME = {
           // germs ramp up as the child cures more patients (the progression)
           spots: { base: 3, growEvery: 2, max: 8, rubs: 3, size: 86, minGap: 0.06,
                    // two rows (fractions of the face image): upper + lower teeth
-                   area: [ { x: 0.34, y: 0.58, w: 0.32, h: 0.022 },
-                           { x: 0.385, y: 0.705, w: 0.23, h: 0.016 } ] },
-          finishParticles: ["⭐", "💖", "✨", "🌟", "😄"],
-          popParticles: ["✨", "🫧"],
+                   area: [ { x: 0.30, y: 0.548, w: 0.40, h: 0.02 },     // printed by `node tools/art/drsmile.cjs`
+                           { x: 0.349, y: 0.626, w: 0.302, h: 0.006 } ] },
+          finishParticles: ["star", "heart", "sparkle", "joy"],
+          popParticles: ["sparkle", "star"],
           foam: { colors: ["#ffffff", "#e8fbff", "#dff6f0"] },
         },
         effects: { propre: 100, sourire: 100 }, reward: 1, stat: "smile",
-        message: "🌟",
-        celebrateMessage: "💖 Bravo ! {name} a un sourire tout neuf ! 🌟" },
+        message: "{i:star}",
+        celebrateMessage: "{i:joy} Bravo ! {name} a un sourire tout neuf !" },
     ],
     celebrate: { mode: "hop", particle: "heart", colors: ["#ff9ec4", "#ffd24a", "#a8e6ff", "#7fd06f"], count: 12 },
     // After being cured & celebrating, the child walks out happily through the door.
     depart: { to: { x: 700, y: 1170 }, speed: 130,
-              emptyMessage: "🔔 Bravo ! Sonne la cloche pour faire venir d'autres enfants !" },
+              emptyMessage: "{i:bell} Bravo ! Sonne la cloche pour faire venir d'autres enfants !" },
 
     // The child patients: boys & girls, each a person with their own sprite, face and name.
     variants: [
@@ -211,12 +223,12 @@ window.GAME = {
 
   /* ---- Reception desk: ring the big golden bell to bring a fresh group of children ---- */
   stations: [
-    { type: "desk", x: 700, y: 352, sprite: "reception", scale: 0.9, label: "🔔 Accueil", labelY: 30,
+    { type: "desk", x: 700, y: 352, sprite: "reception", scale: 0.9, label: "Accueil", labelY: 30, icon: "bell", color: "#ff8fb3", hint: "La cloche fait entrer de nouveaux enfants",
       box: { dx: -138, dy: -66, w: 276, h: 70 }, reach: 130, tapRadius: 110,
-      action: "spawn", actionLabel: "🔔 Faire venir des enfants",
+      action: "spawn", actionLabel: "Sonner la cloche",
       spawn: { min: 3, max: 4, cap: 6, from: { x: 700, y: 1090 },
-               message: "🔔 Ding ! De nouveaux enfants arrivent ! 😄",
-               fullMessage: "Le cabinet est déjà plein ! 😊" } },
+               message: "{i:bell} Ding ! De nouveaux enfants arrivent !",
+               fullMessage: "Le cabinet est déjà plein !" } },
   ],
 
   /* ---- The clinic: walls, door, the big chair (centrepiece), plants & toys ---- */
@@ -238,15 +250,15 @@ window.GAME = {
 
   /* ---- Unlocks: every few stars the clinic gets a new surprise (no reading needed) ---- */
   unlocks: [
-    { id: "balloons", when: { stat: "smile", atLeast: 2 }, message: "🎈 Des ballons pour le cabinet !",
+    { id: "balloons", when: { stat: "smile", atLeast: 2 }, message: "{i:gift} Des ballons pour le cabinet !",
       scenery: { x: 500, y: 410, sprite: "balloons", scale: 0.68, anim: "bob", box: { dx: -14, dy: -10, w: 28, h: 12 } } },
-    { id: "aquarium", when: { stat: "smile", atLeast: 4 }, message: "🐠 Un aquarium avec des poissons !",
+    { id: "aquarium", when: { stat: "smile", atLeast: 4 }, message: "{i:gift} Un aquarium avec des poissons !",
       scenery: { x: 1210, y: 860, sprite: "aquarium", scale: 0.7, box: { dx: -72, dy: -24, w: 144, h: 28 } } },
-    { id: "teddy", when: { stat: "smile", atLeast: 6 }, message: "🧸 Un gros nounours tout doux !",
+    { id: "teddy", when: { stat: "smile", atLeast: 6 }, message: "{i:gift} Un gros nounours tout doux !",
       scenery: { x: 200, y: 830, sprite: "teddy", scale: 0.68, anim: "breathe", box: { dx: -40, dy: -14, w: 80, h: 18 } } },
-    { id: "rainbow", when: { stat: "smile", atLeast: 9 }, message: "🌈 Un tapis arc-en-ciel !",
+    { id: "rainbow", when: { stat: "smile", atLeast: 9 }, message: "{i:gift} Un tapis arc-en-ciel !",
       scenery: { x: 1020, y: 1000, sprite: "rainbow_rug", ground: true, scale: 0.55 } },
-    { id: "trophy", when: { stat: "smile", atLeast: 12 }, message: "🏆 Le trophée du meilleur dentiste !",
+    { id: "trophy", when: { stat: "smile", atLeast: 12 }, message: "{i:trophy} Le trophée du meilleur dentiste !",
       scenery: { x: 900, y: 420, sprite: "trophy", scale: 0.6, glow: "#ffd24a", glowY: 70, box: { dx: -26, dy: -12, w: 52, h: 16 } } },
   ],
 
@@ -254,12 +266,12 @@ window.GAME = {
 
   /* ---- Help screen (short sentences for early readers / a parent) ---- */
   help: [
-    "<b>Bienvenue chez Dr Smile ! 🦷</b>",
-    "<b>👆 Appuie sur un enfant</b> : tu vas vers lui et sa bouche s'ouvre en grand.",
-    "<b>🪥 Frotte les microbes</b> avec ton doigt pour les faire partir !",
-    "<b>🌟 Bravo !</b> L'enfant a un grand sourire et tu gagnes une étoile.",
-    "<b>🎁 Surprises</b> : avec les étoiles, ton cabinet se remplit de cadeaux.",
-    "<b>🔔 La cloche</b> de l'accueil fait entrer de nouveaux enfants.",
-    "<b>🧑‍⚕️ 🔊 (en haut)</b> : change de dentiste, coupe le son. 💾 Le jeu se sauvegarde tout seul.",
+    "<b>Bienvenue chez Dr Smile !</b>",
+    "{i:hand} <b>Appuie sur un enfant</b> : tu vas vers lui et sa bouche s'ouvre en grand.",
+    "{i:brush} <b>Frotte les microbes</b> {i:germ} avec ton doigt pour les faire partir !",
+    "{i:star} <b>Bravo !</b> L'enfant a un grand sourire et tu gagnes une étoile.",
+    "{i:gift} <b>Surprises</b> : avec les étoiles, ton cabinet se remplit de cadeaux.",
+    "{i:bell} <b>La cloche</b> de l'accueil fait entrer de nouveaux enfants.",
+    "{i:avatar} {i:sound} change de dentiste ou coupe le son. Le jeu se sauvegarde tout seul.",
   ],
 };

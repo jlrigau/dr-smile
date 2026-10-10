@@ -18,6 +18,8 @@ domain (**CC0**).
 | Face close-ups (×6) | `assets/img/mouth_*.png` + `mouth_*_done.png` | open mouth → big clean smile |
 | Germs (×3) | `assets/img/germ_*.png` | cute, smiling microbes to scrub away |
 | Toothbrush, bubble | `brush.png`, `want.png` | close-up cursor, "needs care" bubble |
+| UI icons | `assets/ui/icons/*.png` | shared icon kit in the pastel palette + tooth, brush, germ, kid |
+| Home splash | `assets/img/splash.png` | the clinic window, bunting and happy children |
 | Logo & app icons | `assets/img/logo.png`, `assets/favicon.png`, `assets/apple-touch-icon.png` | the shared `tooth()` mascot |
 
 Regenerate: `node .claude/skills/_shared/render-svg.cjs tools/art/drsmile.cjs [--only key]`.

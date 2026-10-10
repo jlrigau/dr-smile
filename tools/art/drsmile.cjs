@@ -6,6 +6,7 @@
  * (tooth()) drives the app icon, the logo and the in-room signs.
  */
 const K = require("../../.claude/skills/_shared/svg-kit.cjs");
+const IK = require("../../.claude/skills/_shared/icon-kit.cjs");
 const { sheet, job, shade, mix, lin, rad, glow, blur, rng, star } = K;
 
 const INK = "#4a3a4e";                   // soft plum outline (friendlier than black)
@@ -193,7 +194,7 @@ function dentist(k, dir, phase, moving, u) {
     const fl = dir === "right" ? `transform="translate(128,0) scale(-1,1)"` : "";
     g += `<g ${fl}>`;
     g += `<circle cx="${cx}" cy="${hy}" r="${r}" fill="url(#${u}s)" ${st}/>`;
-    g += `<circle cx="${cx - r * 0.98}" cy="${hy + r * 0.18}" r="${r * 0.16}" fill="${k.skin}" ${st}/>`;
+    g += `<path d="M${cx - r * 0.9} ${hy - r * 0.02} Q${cx - r * 1.2} ${hy + r * 0.16} ${cx - r * 0.93} ${hy + r * 0.32}" fill="${k.skin}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
     g += `<ellipse cx="${cx - r * 0.45}" cy="${hy + r * 0.05}" rx="${r * 0.11}" ry="${r * 0.15}" fill="${INK}"/><circle cx="${cx - r * 0.49}" cy="${hy - r * 0.02}" r="${r * 0.04}" fill="#fff"/>`;
     g += `<ellipse cx="${cx - r * 0.55}" cy="${hy + r * 0.38}" rx="${r * 0.13}" ry="${r * 0.08}" fill="#ff7f9a" opacity=".5"/>`;
     g += `<path d="M${cx - r * 0.75} ${hy + r * 0.5} Q${cx - r * 0.6} ${hy + r * 0.62} ${cx - r * 0.45} ${hy + r * 0.52}" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`;
@@ -216,72 +217,102 @@ function docThumb(name) { const r = dentist(DOCS[name], "down", 0, false, "t"); 
 function kidThumb(id) { const r = kid(KIDS[id], 0, "happy", "t"); return job(`assets/ui/kid_${id}.png`, 128, 128, r.body, r.defs); }
 
 /* ======================= Close-up faces (open mouth / happy smile) ======================= */
-// Geometry (900×1300) shared with game.config.js spot areas:
-//   (mouth drawn around MC then squeezed into place: translate(450 850) scale(.92 .86))
-//   upper teeth x 280–620, y 740–797 · lower teeth x 326–574, y 900–955
-const FW = 900, FH = 1300, MC = { x: 450, y: 862 };
+// Geometry (900×1300): the open mouth is a "D" between corners (250,712) and (650,712).
+// MOUTH_TEETH() returns the teeth boxes; `node tools/art/drsmile.cjs` prints the spot
+// areas to paste into game.config.js (closeup.spots.area).
+const FW = 900, FH = 1300;
+const ML = { x: 212, y: 686 }, MR = { x: 688, y: 686 };
+const topY = (x) => { const t = (x - ML.x) / (MR.x - ML.x); return ML.y - 4 * 66 * t * (1 - t) / 2; };   // quadratic, control (450,620)
+// bottom edge: cubic (650,712) → (640,900) (260,900) → (250,712); sample to look up y(x)
+const BOT = (() => { const pts = []; for (let i = 0; i <= 200; i++) { const t = i / 200, u = 1 - t;
+  pts.push([u * u * u * 688 + 3 * u * u * t * 684 + 3 * u * t * t * 216 + t * t * t * 212, u * u * u * 686 + 3 * u * u * t * 990 + 3 * u * t * t * 990 + t * t * t * 686]); } return pts; })();
+const botY = (x) => { let best = BOT[0]; BOT.forEach((p) => { if (Math.abs(p[0] - x) < Math.abs(best[0] - x)) best = p; }); return best[1]; };
+// lower gum line: quadratic from (250, botY(250)-40) via (450, botY(450)+4) to (650, botY(650)-40)
+const gumY = (x) => { const t = (x - 250) / 400, a = botY(250) - 40, c = botY(450) + 4, b = botY(650) - 40; return (1 - t) * (1 - t) * a + 2 * (1 - t) * t * c + t * t * b; };
+const MOUTH_D = `M${ML.x} ${ML.y} Q450 620 ${MR.x} ${MR.y} C684 990 216 990 ${ML.x} ${ML.y} Z`;
+function MOUTH_TEETH() {
+  const up = [], lo = [];
+  const uxs = [-180, -112, -38, 38, 112, 180];
+  uxs.forEach((dx) => { const x = 450 + dx, w = Math.abs(dx) > 150 ? 62 : 72, y0 = topY(x) + 26, h = Math.abs(dx) > 150 ? 56 : (Math.abs(dx) > 80 ? 66 : 74); up.push({ x, w, y0, y1: y0 + h }); });
+  const lxs = [-136, -68, 0, 68, 136];
+  lxs.forEach((dx) => { const x = 450 + dx, w = 64, y1 = gumY(x) + 10, h = Math.abs(dx) > 100 ? 50 : 56; lo.push({ x, w, y0: y1 - h, y1 }); });
+  return { up, lo };
+}
+function spotAreas() {
+  const { up, lo } = MOUTH_TEETH();
+  const box = (arr, inset) => { const xs = arr.slice(inset, arr.length - inset); const x0 = xs[0].x, x1 = xs[xs.length - 1].x; const y0 = Math.max(...xs.map((t) => t.y0)) + 14, y1 = Math.min(...xs.map((t) => t.y1)) - 14;
+    return { x: +(x0 / FW).toFixed(3), y: +(y0 / FH).toFixed(3), w: +((x1 - x0) / FW).toFixed(3), h: +(Math.max(4, y1 - y0) / FH).toFixed(3) }; };
+  return [box(up, 0), box(lo, 0)];
+}
 function bigFace(id, done) {
-  const k = KIDS[id], R = 330, cx = 450, cy = 640;
+  const k = KIDS[id], R = 330, cx = 450, cy = 600, HY = cy + 20;        // head ellipse centre (450,620), rx 330, ry 360
   const st = (w) => `stroke="${INK}" stroke-width="${w || 10}" stroke-linejoin="round" stroke-linecap="round"`;
+  const skinD = shade(k.skin, -0.14);
   const defs = lin("bg", [[0, "#fff1f6"], [1, "#e3f6f1"]]) + rad("fs", [[0, shade(k.skin, 0.2)], [0.75, k.skin], [1, shade(k.skin, -0.06)]], 0.45, 0.38, 0.7) +
-    rad("mo", [[0, "#7a2236"], [1, "#4a1424"]], 0.5, 0.4, 0.7) + lin("tg", [[0, "#ff9fb0"], [1, "#e86f88"]]) + lin("th", [[0, "#ffffff"], [1, "#e8eef4"]]) +
-    glow("sp", 8) + rad("halo", [[0, "#ffffff", 0.8], [1, "#ffffff", 0]]);
+    rad("mo", [[0, "#8a2a40"], [0.7, "#5c1a2c"], [1, "#3e1020"]], 0.5, 0.35, 0.75) + lin("tg", [[0, "#ff9fb0"], [1, "#e46f88"]]) + lin("th", [[0, "#ffffff"], [1, "#e9eef4"]]) +
+    lin("ts", [[0, shade(k.shirt, 0.12)], [1, shade(k.shirt, -0.08)]]) + lin("nk", [[0, skinD], [0.35, k.skin], [1, k.skin]]) +
+    `<clipPath id="mclip"><path d="${MOUTH_D}"/></clipPath>` + glow("sp", 8) + rad("halo", [[0, "#ffffff", 0.8], [1, "#ffffff", 0]]);
   let g = `<rect width="${FW}" height="${FH}" fill="url(#bg)"/>`;
-  // soft confetti dots in the background
   const Rr = rng(id.length * 13);
   for (let i = 0; i < 26; i++) { const x = Rr() * FW, y = Rr() * FH; g += `<circle cx="${x}" cy="${y}" r="${6 + Rr() * 10}" fill="${[PINK, MINT, "#ffd24a", "#a8d8ff"][i % 4]}" opacity=".18"/>`; }
-  if (done) g += `<circle cx="${cx}" cy="${cy + 60}" r="560" fill="url(#halo)"/>`;
-  // shoulders / t-shirt
-  g += `<path d="M${cx - 420} ${FH} Q${cx - 380} ${cy + 520} ${cx} ${cy + 500} Q${cx + 380} ${cy + 520} ${cx + 420} ${FH} Z" fill="${k.shirt}" ${st()}/>`;
-  g += `<path d="M${cx - 110} ${cy + 505} Q${cx} ${cy + 600} ${cx + 110} ${cy + 505}" fill="${k.skin}" ${st()}/>`;
-  // hair behind
+  if (done) g += `<circle cx="${cx}" cy="${HY}" r="560" fill="url(#halo)"/>`;
+  // shoulders + t-shirt (drawn first), then the neck rising INTO the head (overlaps the jaw)
+  g += `<path d="M${cx - 430} ${FH + 10} L${cx - 410} ${1150} Q${cx - 380} ${1060} ${cx - 220} ${1040} L${cx + 220} ${1040} Q${cx + 380} ${1060} ${cx + 410} ${1150} L${cx + 430} ${FH + 10} Z" fill="url(#ts)" ${st()}/>`;
+  g += `<path d="M${cx - 105} ${860} L${cx - 112} ${1050} Q${cx} ${1110} ${cx + 112} ${1050} L${cx + 105} ${860} Z" fill="url(#nk)" ${st()}/>`;
+  g += `<path d="M${cx - 150} ${1038} Q${cx} ${1150} ${cx + 150} ${1038}" fill="none" stroke="${shade(k.shirt, -0.25)}" stroke-width="22" stroke-linecap="round"/>`;   // collar
+  g += `<path d="M${cx - 150} ${1038} Q${cx} ${1150} ${cx + 150} ${1038}" fill="none" ${st(9)}/>`;
+  // hair behind, ears, head
   g += hair(k, cx, cy, R, "back").replace(/stroke-width="[\d.]+"/g, 'stroke-width="10"');
-  // ears + head
-  g += `<ellipse cx="${cx - R + 6}" cy="${cy + 40}" rx="56" ry="76" fill="${k.skin}" ${st()}/><ellipse cx="${cx + R - 6}" cy="${cy + 40}" rx="56" ry="76" fill="${k.skin}" ${st()}/>`;
-  g += `<ellipse cx="${cx}" cy="${cy + 20}" rx="${R}" ry="${R * 1.1}" fill="url(#fs)" ${st()}/>`;
-  // eyes
-  const ey = cy - 33;
+  g += `<ellipse cx="${cx - R + 8}" cy="${HY + 30}" rx="56" ry="76" fill="${k.skin}" ${st()}/><ellipse cx="${cx + R - 8}" cy="${HY + 30}" rx="56" ry="76" fill="${k.skin}" ${st()}/>`;
+  g += `<ellipse cx="${cx - R + 14}" cy="${HY + 30}" rx="24" ry="40" fill="${skinD}" opacity=".5"/><ellipse cx="${cx + R - 14}" cy="${HY + 30}" rx="24" ry="40" fill="${skinD}" opacity=".5"/>`;
+  g += `<ellipse cx="${cx}" cy="${HY}" rx="${R}" ry="${R * 1.09}" fill="url(#fs)" ${st()}/>`;
+  // eyes + brows
+  const ey = 500;
   if (done) {
-    [-1, 1].forEach((d) => { g += `<path d="M${cx + d * 125 - 58} ${ey + 14} Q${cx + d * 125} ${ey - 58} ${cx + d * 125 + 58} ${ey + 14}" fill="none" ${st(14)}/>`; });
+    [-1, 1].forEach((d) => { g += `<path d="M${cx + d * 125 - 60} ${ey + 16} Q${cx + d * 125} ${ey - 56} ${cx + d * 125 + 60} ${ey + 16}" fill="none" ${st(15)}/>`; });
   } else {
     [-1, 1].forEach((d) => {
       g += `<ellipse cx="${cx + d * 125}" cy="${ey}" rx="62" ry="70" fill="#fff" ${st(9)}/>`;
-      g += `<circle cx="${cx + d * 125}" cy="${ey - 14}" r="40" fill="${k.eyes}"/><circle cx="${cx + d * 125}" cy="${ey - 14}" r="22" fill="#1c1420"/>`;
-      g += `<circle cx="${cx + d * 125 - 14}" cy="${ey - 30}" r="12" fill="#fff"/><circle cx="${cx + d * 125 + 14}" cy="${ey - 2}" r="6" fill="#fff" opacity=".8"/>`;
-      g += `<path d="M${cx + d * 125 - 54} ${ey - 104} Q${cx + d * 125} ${ey - 128} ${cx + d * 125 + 54} ${ey - 108}" fill="none" stroke="${shade(k.hair, -0.1)}" stroke-width="14" stroke-linecap="round"/>`;
+      g += `<circle cx="${cx + d * 125}" cy="${ey - 12}" r="40" fill="${k.eyes}"/><circle cx="${cx + d * 125}" cy="${ey - 12}" r="22" fill="#1c1420"/>`;
+      g += `<circle cx="${cx + d * 125 - 14}" cy="${ey - 28}" r="12" fill="#fff"/><circle cx="${cx + d * 125 + 14}" cy="${ey}" r="6" fill="#fff" opacity=".8"/>`;
     });
   }
+  [-1, 1].forEach((d) => { g += `<path d="M${cx + d * 125 - 54} ${ey - 104} Q${cx + d * 125} ${ey - 128} ${cx + d * 125 + 54} ${ey - 108}" fill="none" stroke="${shade(k.hair, -0.1)}" stroke-width="14" stroke-linecap="round"/>`; });
   // cheeks + nose
-  g += `<ellipse cx="${cx - 222}" cy="${cy + 52}" rx="56" ry="32" fill="#ff7f9a" opacity="${done ? 0.5 : 0.32}"/><ellipse cx="${cx + 222}" cy="${cy + 52}" rx="56" ry="32" fill="#ff7f9a" opacity="${done ? 0.5 : 0.32}"/>`;
-  g += `<path d="M${cx - 20} ${cy + 56} Q${cx} ${cy + 72} ${cx + 20} ${cy + 56}" fill="none" ${st(8)}/>`;
-  g += `<g transform="translate(450 850) scale(0.92 0.86) translate(-450 -862)">`;
-  if (!done) {
-    // the big open "aaah" mouth
-    g += `<path d="M${MC.x - 250} ${MC.y - 110} Q${MC.x} ${MC.y - 160} ${MC.x + 250} ${MC.y - 110} Q${MC.x + 270} ${MC.y + 110} ${MC.x} ${MC.y + 170} Q${MC.x - 270} ${MC.y + 110} ${MC.x - 250} ${MC.y - 110} Z" fill="url(#mo)" ${st(11)}/>`;
-    g += `<path d="M${MC.x - 170} ${MC.y + 120} Q${MC.x} ${MC.y - 10} ${MC.x + 170} ${MC.y + 120} Q${MC.x} ${MC.y + 175} ${MC.x - 170} ${MC.y + 120} Z" fill="url(#tg)"/>`;
-    g += `<path d="M${MC.x} ${MC.y + 60} L${MC.x} ${MC.y + 130}" stroke="#d9607a" stroke-width="6" stroke-linecap="round"/>`;
-    // upper teeth: 6, hanging from the top lip
-    const up = [[-160, 54], [-104, 60], [-36, 66], [36, 66], [104, 60], [160, 54]];
-    g += `<path d="M${MC.x - 236} ${MC.y - 116} Q${MC.x} ${MC.y - 150} ${MC.x + 236} ${MC.y - 116} L${MC.x + 228} ${MC.y - 92} Q${MC.x} ${MC.y - 122} ${MC.x - 228} ${MC.y - 92} Z" fill="#ff9fb0"/>`;
-    up.forEach(([dx, h]) => { const x = MC.x + dx, w = Math.abs(dx) > 120 ? 50 : 62, y0 = MC.y - 128 + Math.abs(dx) * 0.06; g += `<path d="M${x - w / 2} ${y0} L${x + w / 2} ${y0} L${x + w / 2 - 2} ${y0 + h - 12} Q${x + w / 2 - 4} ${y0 + h} ${x} ${y0 + h} Q${x - w / 2 + 4} ${y0 + h} ${x - w / 2 + 2} ${y0 + h - 12} Z" fill="url(#th)" stroke="#c9b9c6" stroke-width="3.5"/><path d="M${x - w / 2 + 9} ${y0 + 10} L${x - w / 2 + 9} ${y0 + h - 18}" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`; });
-    // lower teeth: 5
-    const lo = [[-120, 44], [-60, 50], [0, 52], [60, 50], [120, 44]];
-    lo.forEach(([dx, h]) => { const x = MC.x + dx, w = 54, y1 = MC.y + 122 - Math.abs(dx) * 0.1; g += `<path d="M${x - w / 2} ${y1} L${x + w / 2} ${y1} L${x + w / 2 - 2} ${y1 - h + 12} Q${x + w / 2 - 4} ${y1 - h} ${x} ${y1 - h} Q${x - w / 2 + 4} ${y1 - h} ${x - w / 2 + 2} ${y1 - h + 12} Z" fill="url(#th)" stroke="#c9b9c6" stroke-width="3.5"/>`; });
-    g += `<path d="M${MC.x - 250} ${MC.y - 110} Q${MC.x} ${MC.y - 160} ${MC.x + 250} ${MC.y - 110} Q${MC.x + 270} ${MC.y + 110} ${MC.x} ${MC.y + 170} Q${MC.x - 270} ${MC.y + 110} ${MC.x - 250} ${MC.y - 110} Z" fill="none" ${st(12)}/>`;
+  g += `<ellipse cx="${cx - 228}" cy="${640}" rx="56" ry="32" fill="#ff7f9a" opacity="${done ? 0.5 : 0.34}"/><ellipse cx="${cx + 228}" cy="${640}" rx="56" ry="32" fill="#ff7f9a" opacity="${done ? 0.5 : 0.34}"/>`;
+  g += `<path d="M${cx - 22} ${598} Q${cx} ${616} ${cx + 22} ${598}" fill="none" ${st(8)}/>`;
+  // ---- the mouth: everything inside is clipped to the lips ----
+  const { up, lo } = MOUTH_TEETH();
+  const tooth = (t, down) => {
+    const r = 12;
+    return down
+      ? `<path d="M${t.x - t.w / 2} ${t.y0 - 6} L${t.x + t.w / 2} ${t.y0 - 6} L${t.x + t.w / 2 - 2} ${t.y1 - r} Q${t.x + t.w / 2 - 3} ${t.y1} ${t.x} ${t.y1} Q${t.x - t.w / 2 + 3} ${t.y1} ${t.x - t.w / 2 + 2} ${t.y1 - r} Z" fill="url(#th)" stroke="#cdbfcb" stroke-width="3.5"/><path d="M${t.x - t.w / 2 + 10} ${t.y0 + 6} L${t.x - t.w / 2 + 10} ${t.y1 - 16}" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`
+      : `<path d="M${t.x - t.w / 2} ${t.y1 + 6} L${t.x + t.w / 2} ${t.y1 + 6} L${t.x + t.w / 2 - 2} ${t.y0 + r} Q${t.x + t.w / 2 - 3} ${t.y0} ${t.x} ${t.y0} Q${t.x - t.w / 2 + 3} ${t.y0} ${t.x - t.w / 2 + 2} ${t.y0 + r} Z" fill="url(#th)" stroke="#cdbfcb" stroke-width="3.5"/>`;
+  };
+  g += `<g clip-path="url(#mclip)">`;
+  g += `<path d="${MOUTH_D}" fill="url(#mo)"/>`;
+  if (done) {
+    g += `<ellipse cx="450" cy="920" rx="200" ry="90" fill="url(#tg)"/>`;
+    g += `<path d="M${ML.x} ${ML.y - 20} Q450 600 ${MR.x} ${MR.y - 20} L${MR.x} ${MR.y + 80} Q450 700 ${ML.x} ${ML.y + 80} Z" fill="url(#th)"/>`;   // one clean row of shiny teeth
+    up.forEach((t) => { g += `<path d="M${t.x + t.w / 2 + 2} ${topY(t.x) + 6} L${t.x + t.w / 2 + 2} ${topY(t.x) + 72}" stroke="#d9d0d8" stroke-width="3.5"/>`; });
+    g += `<path d="M${ML.x} ${ML.y + 80} Q450 700 ${MR.x} ${MR.y + 80}" fill="none" stroke="#d9d0d8" stroke-width="4"/>`;
   } else {
-    // a big, proud, sparkling smile
-    g += `<path d="M${MC.x - 240} ${MC.y - 110} Q${MC.x} ${MC.y - 70} ${MC.x + 240} ${MC.y - 110} Q${MC.x + 200} ${MC.y + 120} ${MC.x} ${MC.y + 130} Q${MC.x - 200} ${MC.y + 120} ${MC.x - 240} ${MC.y - 110} Z" fill="url(#mo)" ${st(11)}/>`;
-    g += `<path d="M${MC.x - 140} ${MC.y + 80} Q${MC.x} ${MC.y + 20} ${MC.x + 140} ${MC.y + 80} Q${MC.x} ${MC.y + 130} ${MC.x - 140} ${MC.y + 80} Z" fill="url(#tg)"/>`;
-    g += `<path d="M${MC.x - 228} ${MC.y - 104} Q${MC.x} ${MC.y - 64} ${MC.x + 228} ${MC.y - 104} L${MC.x + 212} ${MC.y - 20} Q${MC.x} ${MC.y + 18} ${MC.x - 212} ${MC.y - 20} Z" fill="url(#th)" stroke="#c9b9c6" stroke-width="4"/>`;
-    [-150, -75, 0, 75, 150].forEach((dx) => { g += `<path d="M${MC.x + dx} ${MC.y - 84 + Math.abs(dx) * 0.1} L${MC.x + dx} ${MC.y - 6 - Math.abs(dx) * 0.05}" stroke="#d9d0d8" stroke-width="4"/>`; });
-    g += `<path d="M${MC.x - 240} ${MC.y - 110} Q${MC.x} ${MC.y - 70} ${MC.x + 240} ${MC.y - 110} Q${MC.x + 200} ${MC.y + 120} ${MC.x} ${MC.y + 130} Q${MC.x - 200} ${MC.y + 120} ${MC.x - 240} ${MC.y - 110} Z" fill="none" ${st(12)}/>`;
-    [[MC.x - 120, MC.y - 60, 30], [MC.x + 90, MC.y - 66, 24], [MC.x + 330, cy - 260, 44], [MC.x - 340, cy - 230, 36], [MC.x + 300, MC.y + 220, 30], [MC.x - 300, MC.y + 230, 26]].forEach(([x, y, s]) => { g += `<path d="${star(x, y, s, s * 0.3, 4)}" fill="#fff6b8" filter="url(#sp)"/>`; });
+    g += `<ellipse cx="450" cy="900" rx="190" ry="80" fill="url(#tg)"/><path d="M450 860 L450 912" stroke="#d9607a" stroke-width="6" stroke-linecap="round"/>`;
+    g += `<path d="M${ML.x} ${ML.y} Q450 620 ${MR.x} ${MR.y} L${MR.x} ${MR.y + 46} Q450 652 ${ML.x} ${ML.y + 46} Z" fill="#ff9fb0"/>`;          // upper gum
+    // lower gum: a band along the bottom edge, in front of the tongue, behind the teeth roots
+    g += `<path d="M250 ${botY(250) - 40} Q450 ${botY(450) + 4} 650 ${botY(650) - 40} L700 1000 L200 1000 Z" fill="#ff9fb0"/>`;
+    lo.forEach((t) => { g += tooth(t, false); });
+    up.forEach((t) => { g += tooth(t, true); });
   }
   g += `</g>`;
+  g += `<path d="${MOUTH_D}" fill="none" stroke="#e8858f" stroke-width="22" stroke-linejoin="round"/>`;   // lips
+  g += `<path d="${MOUTH_D}" fill="none" ${st(9)}/>`;
+  if (done) [[cx - 140, 690, 28], [cx + 110, 682, 22], [cx + 330, 300, 44], [cx - 340, 330, 36], [cx + 300, 1000, 30], [cx - 300, 1010, 26]].forEach(([x, y, s2]) => { g += `<path d="${star(x, y, s2, s2 * 0.3, 4)}" fill="#fff6b8" filter="url(#sp)"/>`; });
   // hair in front (fringe)
-  g += hair(k, cx, cy - 10, R, "front").replace(/stroke-width="[\d.]+"/g, 'stroke-width="10"');
+  g += hair(k, cx, cy - (k.style === "cap" ? 70 : 10), R, "front").replace(/stroke-width="[\d.]+"/g, 'stroke-width="10"');
   return job(`assets/img/mouth_${id}${done ? "_done" : ""}.png`, FW, FH, g, defs);
 }
+if (require.main === module) console.log("closeup.spots.area =", JSON.stringify(spotAreas()));
 
 /* ======================= Germs, brush, bubble ======================= */
 function germ(file, col, seed) {
@@ -500,7 +531,7 @@ function balloons() {
   const defs = glow("bgl", 2);
   let g = `<ellipse cx="80" cy="232" rx="18" ry="5" fill="#000" opacity=".12"/>`;
   const b = (x, y, c, s) => `<path d="M${x} ${y + 34 * s} Q${x + 8} ${y + 90} 80 222" fill="none" stroke="${INK}" stroke-width="2.5"/><ellipse cx="${x}" cy="${y}" rx="${28 * s}" ry="${34 * s}" fill="${c}" stroke="${INK}" stroke-width="4"/><path d="M${x - 6} ${y + 33 * s} L${x} ${y + 40 * s} L${x + 6} ${y + 33 * s} Z" fill="${c}" stroke="${INK}" stroke-width="3"/><ellipse cx="${x - 10 * s}" cy="${y - 12 * s}" rx="${7 * s}" ry="${11 * s}" fill="#fff" opacity=".6"/>`;
-  g += b(48, 70, "#7fc8ff", 1) + b(112, 64, "#ffd24a", 1) + b(80, 40, PINK, 1.1);
+  g += b(48, 78, "#7fc8ff", 1) + b(112, 72, "#ffd24a", 1) + b(80, 50, PINK, 1.1);
   g += `<rect x="66" y="214" width="28" height="18" rx="5" fill="${MINT}" stroke="${INK}" stroke-width="4"/>`;
   return job("assets/img/balloons.png", W, H, g, defs);
 }
@@ -574,6 +605,49 @@ function logo() {
   return job("assets/img/logo.png", W, H, g, defs);
 }
 
+
+/* ======================= UI icons (shared kit, pastel palette) + game icons ======================= */
+const PAL = { ink: INK, pink: "#ff7fa8", teal: MINT, blue: "#5ab4f0", purple: "#b08cf0", gold: "#ffc93c", green: "#6cd18c" };
+function toothIcon() { return IK.job("assets/ui/icons/tooth.png", tooth(64, 66, 0.36, { outline: INK }), TOOTH_DEFS); }
+function brushIcon() {
+  const defs = lin("bi", [[0, "#7fd8ff"], [1, "#3a9be0"]], 0, 0, 1, 0);
+  let g = `<g transform="rotate(40 64 64)"><rect x="54" y="40" width="20" height="84" rx="10" fill="url(#bi)" stroke="${INK}" stroke-width="7"/><rect x="48" y="6" width="32" height="40" rx="9" fill="#fff" stroke="${INK}" stroke-width="7"/>${[0, 1, 2].map((i) => `<path d="M${56 + i * 8} 12 V38" stroke="${i % 2 ? MINT : "#a8e6ff"}" stroke-width="5" stroke-linecap="round"/>`).join("")}</g>`;
+  [[30, 30, 12], [18, 46, 8], [42, 16, 7]].forEach(([x, y, r]) => { g += `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="${INK}" stroke-width="4"/>`; });
+  return IK.job("assets/ui/icons/brush.png", g, defs);
+}
+function germIcon() {
+  const r = germ("x", "#9be36a", 3);   // reuse the germ drawing, framed as an icon
+  return { file: "assets/ui/icons/germ.png", width: 128, height: 128, svg: r.svg };
+}
+function kidIcon() { const r = kid(KIDS.leo, 0, "happy", "ki"); return IK.job("assets/ui/icons/kid.png", `<g transform="translate(64 64) scale(1.05) translate(-64 -60)">${r.body}</g>`, r.defs); }
+
+/* ======================= Home splash (portrait, behind the logo + bottom sheet) ======================= */
+function splash() {
+  const W = 900, H = 1600;
+  let defs = lin("sw", [[0, "#d9f3ec"], [1, "#bfe8de"]]) + lin("sky", [[0, "#8fd3ff"], [1, "#d7f1ff"]]) + TOOTH_DEFS + glow("sg", 6) + lin("fl", [[0, "#f6dcb3"], [1, "#eccb99"]]);
+  let g = `<rect width="${W}" height="${H}" fill="url(#sw)"/>`;
+  for (let x = 0; x < W; x += 70) g += `<rect x="${x}" y="0" width="35" height="${H}" fill="#ffffff" opacity=".22"/>`;
+  // a big round window with sky and clouds
+  g += `<circle cx="${W / 2}" cy="470" r="250" fill="#fff" stroke="${INK}" stroke-width="10"/><circle cx="${W / 2}" cy="470" r="222" fill="url(#sky)"/>`;
+  g += `<g fill="#fff"><circle cx="360" cy="510" r="44"/><circle cx="420" cy="490" r="58"/><circle cx="480" cy="516" r="40"/><rect x="330" y="510" width="180" height="40" rx="20"/></g>`;
+  g += `<circle cx="560" cy="350" r="46" fill="#ffd24a"/>`;
+  g += `<path d="M${W / 2} 248 V692 M${W / 2 - 222} 470 H${W / 2 + 222}" stroke="#fff" stroke-width="14"/>`;
+  // bunting
+  const cols = [PINK, "#ffd24a", MINT, "#a8d8ff", "#c3a6ff"];
+  g += `<path d="M0 120 Q${W / 2} 230 ${W} 120" fill="none" stroke="${INK}" stroke-width="5"/>`;
+  for (let i = 0; i < 11; i++) { const t = (i + 0.5) / 11, x = t * W, y = 120 + 110 * 4 * t * (1 - t) * 0.92; g += `<path d="M${x - 26} ${y - 4} L${x + 26} ${y - 4} L${x} ${y + 44} Z" fill="${cols[i % 5]}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`; }
+  // floor + rug
+  g += `<rect x="0" y="880" width="${W}" height="${H - 880}" fill="url(#fl)"/>`;
+  for (let y = 880; y < H; y += 64) g += `<rect x="0" y="${y}" width="${W}" height="3" fill="#d9b88a"/>`;
+  g += `<rect x="0" y="860" width="${W}" height="26" fill="#fff"/><rect x="0" y="856" width="${W}" height="8" fill="${PINK}"/>`;
+  g += `<ellipse cx="${W / 2}" cy="1010" rx="400" ry="90" fill="${PINK}"/><ellipse cx="${W / 2}" cy="1010" rx="372" ry="74" fill="#dff6f0"/>`;
+  // happy children standing on the floor
+  const kids = [["lou", 450, 985, 2.15], ["mila", 265, 1030, 2.45], ["leo", 640, 1030, 2.45]];   // inside the phone crop (x 80–820)
+  kids.forEach(([id, x, y, sc], i) => { const r = kid(KIDS[id], 0, "happy", "sp" + i); defs += r.defs; g += `<g transform="translate(${x} ${y}) scale(${sc}) translate(-64 -122)">${r.body}</g>`; });
+  [[130, 330, 26], [780, 300, 22], [150, 720, 18], [760, 740, 20]].forEach(([x, y, r2]) => { g += `<path d="${star(x, y, r2, r2 * 0.33, 4)}" fill="#ffd24a" filter="url(#sg)"/>`; });
+  return K.job("assets/img/splash.png", W, H, g, defs);
+}
+
 module.exports = () => {
   const jobs = [];
   Object.keys(KIDS).forEach((id) => jobs.push(kidSheet(id, "worried"), kidSheet(id, "happy"), kidThumb(id), bigFace(id, false), bigFace(id, true)));
@@ -582,6 +656,8 @@ module.exports = () => {
     chair(), reception(), plant("plant", "#ff9eb8", "monstera"), plant("plant_b", "#7fc8ff", "bush"), toothSign(), bench(), toybox(),
     balloons(), aquarium(), teddy(), rainbowRug(), trophy(),
     germ("germ_green", "#9be36a", 3), germ("germ_purple", "#c79bff", 8), germ("germ_orange", "#ffb35c", 12),
-    brush(), wantBubble(), icon("assets/favicon.png", 512), icon("assets/apple-touch-icon.png", 180), logo());
+    brush(), wantBubble(), icon("assets/favicon.png", 512), icon("assets/apple-touch-icon.png", 180), logo(), splash(),
+    toothIcon(), brushIcon(), germIcon(), kidIcon(),
+    ...IK.jobs(PAL, ["star", "heart", "heartEmpty", "sound", "soundOff", "help", "avatar", "goals", "close", "play", "resume", "check", "gift", "hand", "sparkle", "bell", "refresh", "arrow", "trophy", "joy"]));
   return jobs;
 };
