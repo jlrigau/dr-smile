@@ -210,7 +210,9 @@ input[type="text"]::placeholder { color: var(--muted); opacity: 0.65; }
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background: radial-gradient(ellipse at 50% 48%, transparent 55%, rgba(0, 0, 0, var(--vignette)) 100%);
 }
-#world { width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+#world { width: 100%; height: 100%; touch-action: none; cursor: pointer; background: var(--edge-game, var(--deep)); }
+#world canvas { opacity: 0; transition: opacity .35s ease; }     /* revealed by engine.js once drawn */
+#world.ready canvas { opacity: 1; }
 #world canvas { display: block; touch-action: none; }
 .btn-action { display: none; }
 

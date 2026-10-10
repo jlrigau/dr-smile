@@ -460,6 +460,9 @@ let pendingPlayer = null, placeNameTmp = META.startName || "My Place";
 
 function init() {
   applyStaticText();
+  // The panel stays hidden until it has something to show (an empty card would show as a
+  // bare strip at the bottom while the world loads).
+  const pn = $("panel"); if (pn) { pn.innerHTML = ""; pn.classList.add("idle"); }
   $("btn-start").addEventListener("click", () => {
     placeNameTmp = $("place-name-input").value.trim() || (META.startName || "My Place");
     openCreate({ avatar: CHARACTERS[0].id }, () => newGame(placeNameTmp, pendingPlayer));
@@ -1306,6 +1309,11 @@ function sceneCreate() {
   if (G.camera && G.camera.clampToWorld) this.cameras.main.setBounds(0, 0, WORLD.w, WORLD.h);
   else this.cameras.main.setBounds(-700, -700, WORLD.w + 1400, WORLD.h + 1400);
   this.cameras.main.setBackgroundColor((G.world && G.world.bg) || "#6fae4f");
+  // Reveal the canvas only once the world has been drawn (no black first frame while
+  // loading; #world shows the edge colour meanwhile, then the world fades in).
+  const wEl = $("world"), reveal = () => wEl && wEl.classList.add("ready");
+  this.game.events.once("postrender", () => requestAnimationFrame(reveal));
+  setTimeout(reveal, 2500);
   buildAnims();
   buildWorld();
   cursors = this.input.keyboard.createCursorKeys();
