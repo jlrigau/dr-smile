@@ -23,13 +23,13 @@ window.GAME = {
   meta: {
     title: "Dr Smile",
     titleIcon: "tooth",
-    logo: "assets/img/logo.png",
-    splash: "assets/img/splash.png",   // full-screen illustration behind the home & create screens
+    logo: "assets/img/logo.webp",
+    splash: "assets/img/splash.webp",   // full-screen illustration behind the home & create screens
     shortName: "Dr Smile",
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v26",
+    assetVersion: "v27",
     theme: { home: "#ffe0e9", play: "#cdeee6", closeup: "#fff1f6" },
 
     showCoins: true,
@@ -61,12 +61,12 @@ window.GAME = {
 
   /* ---- Illustrated UI icons (tools/art/drsmile.cjs → assets/ui/icons). Any text can embed {i:key}. ---- */
   icons: {
-    star: "assets/ui/icons/star.png", heart: "assets/ui/icons/heart.png", heartEmpty: "assets/ui/icons/heartEmpty.png", sound: "assets/ui/icons/sound.png",
-    soundOff: "assets/ui/icons/soundOff.png", help: "assets/ui/icons/help.png", avatar: "assets/ui/icons/avatar.png", goals: "assets/ui/icons/goals.png",
-    close: "assets/ui/icons/close.png", play: "assets/ui/icons/play.png", resume: "assets/ui/icons/resume.png", check: "assets/ui/icons/check.png",
-    gift: "assets/ui/icons/gift.png", hand: "assets/ui/icons/hand.png", sparkle: "assets/ui/icons/sparkle.png", bell: "assets/ui/icons/bell.png",
-    refresh: "assets/ui/icons/refresh.png", arrow: "assets/ui/icons/arrow.png", trophy: "assets/ui/icons/trophy.png", joy: "assets/ui/icons/joy.png",
-    tooth: "assets/ui/icons/tooth.png", brush: "assets/ui/icons/brush.png", germ: "assets/ui/icons/germ.png", kid: "assets/ui/icons/kid.png",
+    star: "assets/ui/icons/star.webp", heart: "assets/ui/icons/heart.webp", heartEmpty: "assets/ui/icons/heartEmpty.webp", sound: "assets/ui/icons/sound.webp",
+    soundOff: "assets/ui/icons/soundOff.webp", help: "assets/ui/icons/help.webp", avatar: "assets/ui/icons/avatar.webp", goals: "assets/ui/icons/goals.webp",
+    close: "assets/ui/icons/close.webp", play: "assets/ui/icons/play.webp", resume: "assets/ui/icons/resume.webp", check: "assets/ui/icons/check.webp",
+    gift: "assets/ui/icons/gift.webp", hand: "assets/ui/icons/hand.webp", sparkle: "assets/ui/icons/sparkle.webp", bell: "assets/ui/icons/bell.webp",
+    refresh: "assets/ui/icons/refresh.webp", arrow: "assets/ui/icons/arrow.webp", trophy: "assets/ui/icons/trophy.webp", joy: "assets/ui/icons/joy.webp",
+    tooth: "assets/ui/icons/tooth.webp", brush: "assets/ui/icons/brush.webp", germ: "assets/ui/icons/germ.webp", kid: "assets/ui/icons/kid.webp",
   },
 
   /* ---- Look & feel: soft hi-res art, gentle sunlight motes ---- */
@@ -96,41 +96,41 @@ window.GAME = {
   /* ---- Assets (all generated, CC0) ---- */
   assets: {
     images: {
-      floor: "assets/img/floor.png", rug: "assets/img/rug.png", doormat: "assets/img/doormat.png",
-      wall: "assets/img/wall.png", wall_left: "assets/img/wall_left.png", wall_right: "assets/img/wall_right.png", wall_bottom: "assets/img/wall_bottom.png",
-      chair: "assets/img/chair.png", reception: "assets/img/reception.png",
-      plant: "assets/img/plant.png", plant_b: "assets/img/plant_b.png", toothsign: "assets/img/toothsign.png",
-      bench: "assets/img/bench.png", toybox: "assets/img/toybox.png",
+      floor: { path: "assets/img/floor.webp", res: 2 }, rug: "assets/img/rug.webp", doormat: { path: "assets/img/doormat.webp", res: 2 },
+      wall: { path: "assets/img/wall.webp", res: 2 }, wall_left: { path: "assets/img/wall_left.webp", res: 2 }, wall_right: { path: "assets/img/wall_right.webp", res: 2 }, wall_bottom: { path: "assets/img/wall_bottom.webp", res: 2 },
+      chair: { path: "assets/img/chair.webp", res: 2 }, reception: { path: "assets/img/reception.webp", res: 2 },
+      plant: { path: "assets/img/plant.webp", res: 2 }, plant_b: { path: "assets/img/plant_b.webp", res: 2 }, toothsign: { path: "assets/img/toothsign.webp", res: 2 },
+      bench: { path: "assets/img/bench.webp", res: 2 }, toybox: { path: "assets/img/toybox.webp", res: 2 },
       // unlockable decorations (the clinic grows with each star)
-      balloons: "assets/img/balloons.png", aquarium: "assets/img/aquarium.png", teddy: "assets/img/teddy.png",
-      rainbow_rug: "assets/img/rainbow_rug.png", trophy: "assets/img/trophy.png",
+      balloons: { path: "assets/img/balloons.webp", res: 2 }, aquarium: { path: "assets/img/aquarium.webp", res: 2 }, teddy: { path: "assets/img/teddy.webp", res: 2 },
+      rainbow_rug: { path: "assets/img/rainbow_rug.webp", res: 2 }, trophy: { path: "assets/img/trophy.webp", res: 2 },
       // close-up mini-scene: each child's open mouth + their big smile afterwards
-      mouth_leo: "assets/img/mouth_leo.png", mouth_leo_done: "assets/img/mouth_leo_done.png",
-      mouth_mila: "assets/img/mouth_mila.png", mouth_mila_done: "assets/img/mouth_mila_done.png",
-      mouth_sacha: "assets/img/mouth_sacha.png", mouth_sacha_done: "assets/img/mouth_sacha_done.png",
-      mouth_lou: "assets/img/mouth_lou.png", mouth_lou_done: "assets/img/mouth_lou_done.png",
-      mouth_tom: "assets/img/mouth_tom.png", mouth_tom_done: "assets/img/mouth_tom_done.png",
-      mouth_zoe: "assets/img/mouth_zoe.png", mouth_zoe_done: "assets/img/mouth_zoe_done.png",
-      germ_green: "assets/img/germ_green.png", germ_purple: "assets/img/germ_purple.png", germ_orange: "assets/img/germ_orange.png",
-      brush: "assets/img/brush.png",
-      want: "assets/img/want.png",       // "needs care" bubble floating over a child with dirty teeth
+      mouth_leo: { path: "assets/img/mouth_leo.webp", res: 2 }, mouth_leo_done: { path: "assets/img/mouth_leo_done.webp", res: 2 },
+      mouth_mila: { path: "assets/img/mouth_mila.webp", res: 2 }, mouth_mila_done: { path: "assets/img/mouth_mila_done.webp", res: 2 },
+      mouth_sacha: { path: "assets/img/mouth_sacha.webp", res: 2 }, mouth_sacha_done: { path: "assets/img/mouth_sacha_done.webp", res: 2 },
+      mouth_lou: { path: "assets/img/mouth_lou.webp", res: 2 }, mouth_lou_done: { path: "assets/img/mouth_lou_done.webp", res: 2 },
+      mouth_tom: { path: "assets/img/mouth_tom.webp", res: 2 }, mouth_tom_done: { path: "assets/img/mouth_tom_done.webp", res: 2 },
+      mouth_zoe: { path: "assets/img/mouth_zoe.webp", res: 2 }, mouth_zoe_done: { path: "assets/img/mouth_zoe_done.webp", res: 2 },
+      germ_green: "assets/img/germ_green.webp", germ_purple: "assets/img/germ_purple.webp", germ_orange: "assets/img/germ_orange.webp",
+      brush: "assets/img/brush.webp",
+      want: { path: "assets/img/want.webp", res: 2 },       // "needs care" bubble floating over a child with dirty teeth
     },
     sheets: {
-      drsmile: { path: "assets/sheet/drsmile.png", frameWidth: 128, frameHeight: 128 },
-      drsmile_pink: { path: "assets/sheet/drsmile_pink.png", frameWidth: 128, frameHeight: 128 },
+      drsmile: { path: "assets/sheet/drsmile.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      drsmile_pink: { path: "assets/sheet/drsmile_pink.webp", frameWidth: 128, frameHeight: 128, res: 2 },
       // the child patients — a worried sheet (arriving) and a happy sheet (cured)
-      kid_leo: { path: "assets/sheet/kid_leo.png", frameWidth: 128, frameHeight: 128 },
-      kid_leo_happy: { path: "assets/sheet/kid_leo_happy.png", frameWidth: 128, frameHeight: 128 },
-      kid_mila: { path: "assets/sheet/kid_mila.png", frameWidth: 128, frameHeight: 128 },
-      kid_mila_happy: { path: "assets/sheet/kid_mila_happy.png", frameWidth: 128, frameHeight: 128 },
-      kid_sacha: { path: "assets/sheet/kid_sacha.png", frameWidth: 128, frameHeight: 128 },
-      kid_sacha_happy: { path: "assets/sheet/kid_sacha_happy.png", frameWidth: 128, frameHeight: 128 },
-      kid_lou: { path: "assets/sheet/kid_lou.png", frameWidth: 128, frameHeight: 128 },
-      kid_lou_happy: { path: "assets/sheet/kid_lou_happy.png", frameWidth: 128, frameHeight: 128 },
-      kid_tom: { path: "assets/sheet/kid_tom.png", frameWidth: 128, frameHeight: 128 },
-      kid_tom_happy: { path: "assets/sheet/kid_tom_happy.png", frameWidth: 128, frameHeight: 128 },
-      kid_zoe: { path: "assets/sheet/kid_zoe.png", frameWidth: 128, frameHeight: 128 },
-      kid_zoe_happy: { path: "assets/sheet/kid_zoe_happy.png", frameWidth: 128, frameHeight: 128 },
+      kid_leo: { path: "assets/sheet/kid_leo.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_leo_happy: { path: "assets/sheet/kid_leo_happy.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_mila: { path: "assets/sheet/kid_mila.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_mila_happy: { path: "assets/sheet/kid_mila_happy.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_sacha: { path: "assets/sheet/kid_sacha.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_sacha_happy: { path: "assets/sheet/kid_sacha_happy.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_lou: { path: "assets/sheet/kid_lou.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_lou_happy: { path: "assets/sheet/kid_lou_happy.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_tom: { path: "assets/sheet/kid_tom.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_tom_happy: { path: "assets/sheet/kid_tom_happy.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_zoe: { path: "assets/sheet/kid_zoe.webp", frameWidth: 128, frameHeight: 128, res: 2 },
+      kid_zoe_happy: { path: "assets/sheet/kid_zoe_happy.webp", frameWidth: 128, frameHeight: 128, res: 2 },
     },
   },
 
@@ -143,8 +143,8 @@ window.GAME = {
     shadow: { w: 40, h: 12 },
   },
   characters: [
-    { id: "mint", name: "Dr Smile", sheet: "drsmile", thumb: "drsmile_thumb" },
-    { id: "rose", name: "Dr Rose", sheet: "drsmile_pink", thumb: "drsmile_pink_thumb" },
+    { id: "mint", name: "Dr Smile", sheet: "drsmile", thumb: "assets/ui/drsmile_thumb.webp" },
+    { id: "rose", name: "Dr Rose", sheet: "drsmile_pink", thumb: "assets/ui/drsmile_pink_thumb.webp" },
   ],
 
   /* ---- Patients: tap a child → walk over → the open-mouth mini-scene starts ----
@@ -199,12 +199,12 @@ window.GAME = {
 
     // The child patients: boys & girls, each a person with their own sprite, face and name.
     variants: [
-      { id: "leo", name: "Léo", fixedName: true, sheet: "kid_leo", happySheet: "kid_leo_happy", closeupBg: "mouth_leo", closeupBgDone: "mouth_leo_done", thumb: "assets/ui/kid_leo.png", color: "#5aa9e6" },
-      { id: "mila", name: "Mila", fixedName: true, sheet: "kid_mila", happySheet: "kid_mila_happy", closeupBg: "mouth_mila", closeupBgDone: "mouth_mila_done", thumb: "assets/ui/kid_mila.png", color: "#ff8fb3" },
-      { id: "sacha", name: "Sacha", fixedName: true, sheet: "kid_sacha", happySheet: "kid_sacha_happy", closeupBg: "mouth_sacha", closeupBgDone: "mouth_sacha_done", thumb: "assets/ui/kid_sacha.png", color: "#6cc47a" },
-      { id: "lou", name: "Lou", fixedName: true, sheet: "kid_lou", happySheet: "kid_lou_happy", closeupBg: "mouth_lou", closeupBgDone: "mouth_lou_done", thumb: "assets/ui/kid_lou.png", color: "#ffd24a" },
-      { id: "tom", name: "Tom", fixedName: true, sheet: "kid_tom", happySheet: "kid_tom_happy", closeupBg: "mouth_tom", closeupBgDone: "mouth_tom_done", thumb: "assets/ui/kid_tom.png", color: "#ef6a6a" },
-      { id: "zoe", name: "Zoé", fixedName: true, sheet: "kid_zoe", happySheet: "kid_zoe_happy", closeupBg: "mouth_zoe", closeupBgDone: "mouth_zoe_done", thumb: "assets/ui/kid_zoe.png", color: "#b48ae6" },
+      { id: "leo", name: "Léo", fixedName: true, sheet: "kid_leo", happySheet: "kid_leo_happy", closeupBg: "mouth_leo", closeupBgDone: "mouth_leo_done", thumb: "assets/ui/kid_leo.webp", color: "#5aa9e6" },
+      { id: "mila", name: "Mila", fixedName: true, sheet: "kid_mila", happySheet: "kid_mila_happy", closeupBg: "mouth_mila", closeupBgDone: "mouth_mila_done", thumb: "assets/ui/kid_mila.webp", color: "#ff8fb3" },
+      { id: "sacha", name: "Sacha", fixedName: true, sheet: "kid_sacha", happySheet: "kid_sacha_happy", closeupBg: "mouth_sacha", closeupBgDone: "mouth_sacha_done", thumb: "assets/ui/kid_sacha.webp", color: "#6cc47a" },
+      { id: "lou", name: "Lou", fixedName: true, sheet: "kid_lou", happySheet: "kid_lou_happy", closeupBg: "mouth_lou", closeupBgDone: "mouth_lou_done", thumb: "assets/ui/kid_lou.webp", color: "#ffd24a" },
+      { id: "tom", name: "Tom", fixedName: true, sheet: "kid_tom", happySheet: "kid_tom_happy", closeupBg: "mouth_tom", closeupBgDone: "mouth_tom_done", thumb: "assets/ui/kid_tom.webp", color: "#ef6a6a" },
+      { id: "zoe", name: "Zoé", fixedName: true, sheet: "kid_zoe", happySheet: "kid_zoe_happy", closeupBg: "mouth_zoe", closeupBgDone: "mouth_zoe_done", thumb: "assets/ui/kid_zoe.webp", color: "#b48ae6" },
     ],
 
     names: ["Nina", "Hugo", "Jade", "Sami", "Lina", "Noé"],

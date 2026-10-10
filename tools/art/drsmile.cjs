@@ -586,13 +586,23 @@ function trophy() {
 }
 
 /* ======================= Icons & logo (the shared tooth mascot) ======================= */
-function icon(file, size) {
-  const defs = TOOTH_DEFS + lin("ib", [[0, "#ffd9e6"], [1, "#c8efe6"]]) + glow("ig", size / 60);
-  let g = `<rect width="${size}" height="${size}" fill="url(#ib)"/>`;
-  g += tooth(size / 2, size * 0.53, size / 340, { outline: "#d5dde4" });
-  g += `<path d="${star(size * 0.8, size * 0.2, size * 0.075, size * 0.026, 4)}" fill="#ffd24a" filter="url(#ig)"/>`;
-  g += `<path d="${star(size * 0.18, size * 0.3, size * 0.045, size * 0.016, 4)}" fill="#ffffff" filter="url(#ig)"/>`;
-  return job(file, size, size, g, defs);
+// App icon (home screen): drawn on a 512 grid, rendered at any size. `safe` < 1 shrinks the
+// subject into the central safe zone for Android "maskable" icons (cropped to a circle).
+function icon(file, size, safe = 1) {
+  const S = 512, k = safe;
+  const defs = TOOTH_DEFS + rad("ib", [[0, "#8ff0e2"], [0.55, "#4fc9bc"], [1, "#2f9f95"]], 0.5, 0.35, 0.8) + glow("ig", 10) +
+    rad("ih", [[0, "#ffffff", 0.75], [1, "#ffffff", 0]]) + lin("ibh", [[0, "#8fe0ff"], [1, "#3a9be0"]], 0, 0, 1, 0);
+  let g = `<rect width="${S}" height="${S}" fill="url(#ib)"/>`;
+  for (let i = 0; i < 16; i++) { const a0 = (i / 16) * Math.PI * 2, a1 = a0 + Math.PI / 16; g += `<path d="M256 250 L${256 + Math.cos(a0) * 520} ${250 + Math.sin(a0) * 520} L${256 + Math.cos(a1) * 520} ${250 + Math.sin(a1) * 520} Z" fill="#ffffff" opacity=".07"/>`; }
+  g += `<circle cx="256" cy="262" r="${210 * k}" fill="url(#ih)"/>`;
+  g += `<g transform="translate(256 262) scale(${k}) translate(-256 -262)">`;
+  // the toothbrush behind the tooth
+  g += `<g transform="rotate(32 360 250)"><rect x="344" y="150" width="34" height="230" rx="17" fill="url(#ibh)" stroke="${INK}" stroke-width="10"/><rect x="332" y="70" width="58" height="96" rx="14" fill="#fff" stroke="${INK}" stroke-width="10"/>${[0, 1, 2, 3].map((i) => `<path d="M${344 + i * 11} 82 V150" stroke="${i % 2 ? MINT : "#8fd8ff"}" stroke-width="7" stroke-linecap="round"/>`).join("")}</g>`;
+  [[392, 112, 22], [420, 152, 15], [368, 84, 13]].forEach(([x, y, r]) => { g += `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="${INK}" stroke-width="6"/>`; });
+  g += tooth(236, 286, 1.28, { outline: INK });
+  g += `</g>`;
+  [[96, 104, 30, "#ffd24a"], [430, 420, 24, "#ffffff"], [84, 400, 18, "#ffffff"]].forEach(([x, y, r, c]) => { g += `<path d="${star(x, y, r * k, r * 0.33 * k, 4)}" fill="${c}" filter="url(#ig)"/>`; });
+  return Object.assign(job(file, S, S, g, defs), { scale: size / S });
 }
 function logo() {
   const W = 420, H = 300;
@@ -648,15 +658,28 @@ function splash() {
   return K.job("assets/img/splash.png", W, H, g, defs);
 }
 
-module.exports = () => {
-  const jobs = [];
+module.exports = () => K.hidpi(build([]), HIDPI);
+// Resolution per family of images (see svg-kit.hidpi): world sprites x2 (config `res: 2`),
+// menu thumbnails x6, icons x2, full-screen backdrops x2, close-up props x3 — all WebP
+// except the PWA icons.
+const HIDPI = [
+  [/favicon|apple-touch|icon-192|icon-maskable/, { keep: true }],
+  [/mouth_|splash/, { scale: 2, type: "webp", ext: ".webp" }],
+  [/logo/, { scale: 2.5, type: "webp", ext: ".webp" }],
+  [/ui\/icons\//, { scale: 2, type: "webp", ext: ".webp" }],
+  [/assets\/ui\//, { scale: 6, type: "webp", ext: ".webp" }],
+  [/germ_|brush/, { scale: 3, type: "webp", ext: ".webp" }],
+  [/\/rug\./, { scale: 1.4, type: "webp", ext: ".webp" }],
+  [/assets\/(img|sheet)\//, { scale: 2, type: "webp", ext: ".webp" }],
+];
+function build(jobs) {
   Object.keys(KIDS).forEach((id) => jobs.push(kidSheet(id, "worried"), kidSheet(id, "happy"), kidThumb(id), bigFace(id, false), bigFace(id, true)));
   Object.keys(DOCS).forEach((n) => jobs.push(docSheet(n), docThumb(n)));
   jobs.push(floor(), rug(740, 540), wall(1400), sideWall("wall_left", 1100, false), sideWall("wall_right", 1100, true), bottomWall(1400), doormat(),
     chair(), reception(), plant("plant", "#ff9eb8", "monstera"), plant("plant_b", "#7fc8ff", "bush"), toothSign(), bench(), toybox(),
     balloons(), aquarium(), teddy(), rainbowRug(), trophy(),
     germ("germ_green", "#9be36a", 3), germ("germ_purple", "#c79bff", 8), germ("germ_orange", "#ffb35c", 12),
-    brush(), wantBubble(), icon("assets/favicon.png", 512), icon("assets/apple-touch-icon.png", 180), logo(), splash(),
+    brush(), wantBubble(), icon("assets/favicon.png", 512), icon("assets/apple-touch-icon.png", 180), icon("assets/icon-192.png", 192), icon("assets/icon-maskable.png", 512, 0.78), logo(), splash(),
     toothIcon(), brushIcon(), germIcon(), kidIcon(),
     ...IK.jobs(PAL, ["star", "heart", "heartEmpty", "sound", "soundOff", "help", "avatar", "goals", "close", "play", "resume", "check", "gift", "hand", "sparkle", "bell", "refresh", "arrow", "trophy", "joy"]));
   return jobs;
