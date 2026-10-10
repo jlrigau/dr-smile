@@ -166,6 +166,17 @@ like a game made by a studio — not a prototype. Concretely:
 - Tried and REJECTED for the iOS bottom band: measuring the viewport gap (--vp-gap) — iOS corrects
   the viewport silently and everything shifted down. Kept: html.ios-app + --app-h, scroll lock,
   per-screen edge colours, stale-page guard.
+- Art module map (tools/art/drsmile.cjs): tooth() = the mascot shared by app icon, logo and sign;
+  bigFace() = close-up faces (neck + collar mandatory); MOUTH_TEETH(); spotAreas() prints the spot
+  areas when the module is run directly → copy them into the config whenever the mouth changes;
+  icon(file,size,safe) for app icons (maskable safe 0.78); kidIcon/toothIcon/brushIcon/germIcon.
+- Nebula (template demo, tools/art/nebula.cjs): critter() = mascot; HIDPI closeup/splash ×2, logo ×2.5,
+  icons ×2, ui ×6, dust/cloth ×3, pen_floor ×1.4, img/sheet ×2; camera {fitW:520, fitH:620, min:0.5, max:1.2}.
+- Probes by symptom: "stuck" → stress.cjs (STEPS, SEED) + watchdog.cjs; "band / shift on iOS" →
+  ios-standalone-check.cjs; "ugly animation" → reveal.cjs (REVEAL=id filmstrip); loading transition →
+  film frames after a tap with assets slowed via page.route (no probe yet — worth adding).
+- Full history of the previous session (owner's messages verbatim): list_events on
+  session_01RqEJ5iTdRhXeSfVGyNmYrJ (kinds ["user","assistant"]).
 - Open / unconfirmed with the owner: the "character stuck, only a reload helps" report was never
   reproduced (stress.cjs 110+ steps) — the freeze watchdog is validated in simulation only; the iOS
   layout fixes and the new app icon (remove + re-add the home-screen shortcut) are not yet confirmed
