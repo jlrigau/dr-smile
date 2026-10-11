@@ -8,7 +8,7 @@ engine code holds **no game content**; a game is fully described by `game.config
 (`window.GAME`) + assets. Swap config + assets (or run the **new-game** skill) to make a
 different game from the same engine and skills.
 
-Ships a neutral demo that is the engine's **showcase**: **Nebula Nursery** — a keeper
+The engine's **showcase** is **Nebula Nursery** (own repo `ludea-ai/nebula`) — a keeper
 robot tends glowing alien critters on a space station (deck island in the void, Delivery
 Plaza, shop street, Star Ring road through an asteroid belt), and the demo turns on (nearly)
 every engine system: care + close-up, variants + happy faces, aging, breeding, riding +
@@ -17,6 +17,10 @@ paid restyle, spawn portal, 3 kinds of two-leg deliveries + drone chase, Hatcher
 pseudo-3D race, ground patches (districts).
 New games still start **minimal** from `.claude/skills/new-game/references/minimal-seed.config.js`.
 Whenever the engine gains a capability, **add it to Nebula too** (it must show everything).
+
+**Ludea organisation** (https://github.com/ludea-ai, see §11): `game-engine` = the GitHub template
+(engine + small starter game) · `nebula` = the showcase, where engine work is developed then synced
+to every repo · `ludea.ai` = the brand site + games catalogue · the games. Live at `https://ludea.ai/<repo>/`.
 
 ## 2. Golden rule
 - **`engine.js` is generic — never put game content in it.** All game data, strings,
@@ -56,8 +60,8 @@ Whenever the engine gains a capability, **add it to Nebula too** (it must show e
   (`node .claude/skills/_shared/playtest.cjs`) for screenshots, walkability and page
   errors. The harness points Chromium at `HTTPS_PROXY` when set; Phaser is vendored so
   tests don't need a CDN. **Always validate visually before pushing.**
-- Several games served at once: target one with `--port N` (game-engine 8099, dr-smile 8100, gta7 8101,
-  my-little-stable 8102). The harness refuses unknown options — an ignored `--url` once made every
+- Several games served at once: target one with `--port N` (nebula 8099, dr-smile 8100, gta7 8101,
+  my-little-stable 8102, game-engine starter 8103, ludea.ai site 8104). The harness refuses unknown options — an ignored `--url` once made every
   "other game" regression silently test Nebula.
 
 ## 6. Engine capabilities (all config-gated — see ENGINE.md)
@@ -86,8 +90,8 @@ place-scatter, state-migration. Assets: asset-search (content policy via
 ios-pwa-check, release-deploy, **visual-review** (art-check + full-size crops + tour
 screenshots + checklist — mandatory after any art/UI change). **capitalize-learnings** (run after every feature/bugfix:
 fold the learnings back into the engine/skills/docs and audit the separation).
-**sync-engine** (template-side: backport engine/skills/tooling FROM a game INTO the
-template). Shared tooling in `_shared/` (incl. `separation-audit.cjs`, `prune-assets.cjs`,
+**sync-engine** (copy the engine layer from the repo where it evolved — normally Nebula —
+into the template and every game). Shared tooling in `_shared/` (incl. `separation-audit.cjs`, `prune-assets.cjs`,
 `sync-engine.sh`, `art-check.cjs`, `icon-kit.cjs`, `contact-sheet.py`, `probes/tour.cjs`).
 
 ## 8. Conventions
@@ -178,7 +182,7 @@ like a game made by a studio — not a prototype. Concretely:
 - New owner feedback → add it to this section (via **capitalize-learnings**).
 
 ## 10. This game — « Dr Smile » (dr-smile)
-- Gentle dentist game for a 6–7 year-old early reader (French). Live: https://jlrigau.github.io/dr-smile/
+- Gentle dentist game for a 6–7 year-old early reader (French). Live: https://ludea.ai/dr-smile/
 - Since Oct 2026 the engine, all 4 game repos and the template are maintained from ONE session; the
   engine layer is identical in every repo (copy it verbatim after any engine change, batch engine
   changes: each sync bumps Dr Smile and reloads the owner's game mid-test).
@@ -199,7 +203,7 @@ like a game made by a studio — not a prototype. Concretely:
   bigFace() = close-up faces (neck + collar mandatory); MOUTH_TEETH(); spotAreas() prints the spot
   areas when the module is run directly → copy them into the config whenever the mouth changes;
   icon(file,size,safe) for app icons (maskable safe 0.78); kidIcon/toothIcon/brushIcon/germIcon.
-- Nebula (template demo, tools/art/nebula.cjs): critter() = mascot; HIDPI closeup/splash ×2, logo ×2.5,
+- Nebula (showcase repo `nebula`, tools/art/nebula.cjs): critter() = mascot; HIDPI closeup/splash ×2, logo ×2.5,
   icons ×2, ui ×6, dust/cloth ×3, pen_floor ×1.4, img/sheet ×2; camera {fitW:520, fitH:620, min:0.5, max:1.2}.
 - Probes by symptom: "stuck" → stress.cjs (STEPS, SEED) + watchdog.cjs; "band / shift on iOS" →
   ios-standalone-check.cjs; "ugly animation" → reveal.cjs (REVEAL=id filmstrip); loading transition →
@@ -210,3 +214,26 @@ like a game made by a studio — not a prototype. Concretely:
   reproduced (stress.cjs 110+ steps) — the freeze watchdog is validated in simulation only; the iOS
   layout fixes and the new app icon (remove + re-add the home-screen shortcut) are not yet confirmed
   on a real iPhone; sound never checked on a device. Always ask which build number is shown.
+
+## 11. Ludea organisation (restructured Oct 2026)
+Layout in https://github.com/ludea-ai (every repo is served at `https://ludea.ai/<repo>/` once the
+org site repo carries the custom domain — see the open items):
+- **`game-engine`** — the GitHub template: engine layer + a SMALL starter game (`game.config.js` =
+  `.claude/skills/new-game/references/minimal-seed.config.js`, art in `tools/art/starter.cjs`).
+  Publishes nothing (no Pages deploy). "Use this template" gives exactly that.
+- **`nebula`** — the full showcase (https://ludea.ai/nebula/). Engine work is developed and
+  probe-tested here (it exercises every system), then synced (`sync-engine`) into the template
+  and every game. Every new engine capability is shown in Nebula.
+- **`ludea.ai`** — the brand site (https://ludea.ai/): landing EN at `/`, FR at `/fr/`, design
+  system at `/design/`, games catalogue, all Ludea brand art (`tools/art/brand.cjs`). When a game
+  is added or gains a mode, update its catalogue card there.
+- Games: `dr-smile`, `gta7`, `my-little-stable`.
+- The engine layer (engine.js, engine.css, ENGINE.md, vendor/, .claude/skills) is identical in every
+  repo. Old `jlrigau.github.io/…` addresses are gone (repos transferred); saves were not migrated
+  (owner: fine). Later (not now): load the engine from one place instead of copying it.
+- Open items for the OWNER (GitHub/DNS settings, not doable from a session): the org site repo is
+  named `ludea.ai` — GitHub only lets the other repos inherit the domain (ludea.ai/<repo>/) when the
+  org site repo is named **`ludea-ai.github.io`**: rename it (Settings → General), keep the custom
+  domain ludea.ai on it ONLY (never per repo). DNS (Namecheap): delete the leftover record pointing
+  to 162.255.119.235, add `www` CNAME → ludea-ai.github.io, optionally the 4 AAAA
+  (2606:50c0:800{0,1,2,3}::153); then Pages → "Enforce HTTPS".

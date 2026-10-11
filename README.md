@@ -6,7 +6,7 @@ starting to read. You play *Dr Smile*: children arrive with dirty teeth, the vie
 shines — then the child leaves happy. No stress, no failure, almost no text. For **young
 kids (6–7)**.
 
-▶ **[Play Dr Smile](https://jlrigau.github.io/dr-smile/)**
+▶ **[Play Dr Smile](https://ludea.ai/dr-smile/)**
 
 > Dr Smile is built on a **generic, reusable 2D game engine** (Phaser 3, 100% static, no
 > build). The whole game lives in `game.config.js` + assets; the engine code is never
