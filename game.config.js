@@ -21,6 +21,7 @@
 window.GAME = {
   /* ---- Identity, theming, UI strings (French) ---- */
   meta: {
+    lang: "fr",                        // source language of every text below (translations: game.i18n.js)
     title: "Dr Smile",
     titleIcon: "tooth",
     logo: "assets/img/logo.webp",
@@ -29,7 +30,7 @@ window.GAME = {
     tagline: "Brosse les dents et rends tout le monde heureux !",
     saveKey: "dr-smile",
     audience: { minAge: 6, notes: "young kids (6–7), gentle, cute, no stress, no fear, no pain/blood/scary tools, minimal text" },
-    assetVersion: "v50",
+    assetVersion: "v51",
     theme: { home: "#ffe0e9", play: "#cdeee6", closeup: "#fff1f6" },
 
     showCoins: true,
